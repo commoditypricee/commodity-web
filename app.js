@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
     fetchMarketData();
     // Verileri her 60 saniyede bir otomatik yenile
-    setInterval(fetchMarketData, 60000); 
+    // 60000 (1 dakika) yerine 300000 (5 dakika) yapalım
+setInterval(fetchMarketData, 300000); 
 });
 
 async function fetchMarketData() {
