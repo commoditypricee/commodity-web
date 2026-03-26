@@ -2,10 +2,12 @@ const fs = require('fs');
 
 async function updateData() {
     try {
-        // Modern yöntem: Dinamik import ile kütüphaneyi içeri alıyoruz
-        const { default: yahooFinance } = await import('yahoo-finance2');
-        
-        yahooFinance.setGlobalConfig({ validation: { logErrors: false } });
+        // Dinamik import ile kütüphaneyi en güvenli şekilde çağırıyoruz
+        const yf = await import('yahoo-finance2');
+        // Kütüphanenin yapısına göre doğru fonksiyonu yakalıyoruz
+        const yahooFinance = yf.default.quote ? yf.default : yf;
+
+        // Sorun çıkaran setGlobalConfig satırını tamamen sildik!
         const symbols = ['GC=F', 'SI=F', 'HG=F', 'BZ=F', 'NG=F'];
         
         // Verileri çekiyoruz
@@ -21,8 +23,11 @@ async function updateData() {
         // Gelen veriyi 'data.json' dosyasına kaydediyoruz
         fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
         console.log("Veriler başarıyla çekildi ve data.json dosyasına yazıldı!");
+        
     } catch (error) {
-        console.error("Veri çekme hatası:", error.message);
+        console.error("Veri çekme hatası:", error);
+        // GitHub'a "Görev BAŞARISIZ oldu, yeşil tik VERME" diyoruz!
+        process.exit(1); 
     }
 }
 
