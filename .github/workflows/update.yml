@@ -11,11 +11,10 @@ jobs:
     permissions:
       contents: write
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Bu satır sarı uyarıyı sonsuza dek yok edecek
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Kodları Çek
-# ... (kodun geri kalanı aynı şekilde devam ediyor) ...
         uses: actions/checkout@v4
 
       - name: Node.js Kurulumu
@@ -28,13 +27,11 @@ jobs:
 
       - name: Veri Çekiciyi Çalıştır
         run: node update.js
-- name: Değişiklikleri Kaydet
+
+      - name: Değişiklikleri Kaydet
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "🔄 Piyasa verileri güncellendi" || echo "Değişiklik yok"
-          git push
           git add -A
           git commit -m "🔄 Piyasa verileri güncellendi" || echo "Değişiklik yok"
           git push
