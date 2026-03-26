@@ -1,12 +1,14 @@
 const fs = require('fs');
-const yahooFinance = require('yahoo-finance2').default;
 
 async function updateData() {
     try {
+        // Modern yöntem: Dinamik import ile kütüphaneyi içeri alıyoruz
+        const { default: yahooFinance } = await import('yahoo-finance2');
+        
         yahooFinance.setGlobalConfig({ validation: { logErrors: false } });
         const symbols = ['GC=F', 'SI=F', 'HG=F', 'BZ=F', 'NG=F'];
         
-        // Verileri usulca çekiyoruz
+        // Verileri çekiyoruz
         const quotes = await Promise.all(symbols.map(sym => yahooFinance.quote(sym)));
         
         const data = quotes.map(q => ({
@@ -16,7 +18,7 @@ async function updateData() {
             changePercent: (q.regularMarketChangePercent || 0).toFixed(2)
         }));
 
-        // Gelen veriyi 'data.json' adında bir dosyaya kaydediyoruz
+        // Gelen veriyi 'data.json' dosyasına kaydediyoruz
         fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
         console.log("Veriler başarıyla çekildi ve data.json dosyasına yazıldı!");
     } catch (error) {
