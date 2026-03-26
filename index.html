@@ -3,18 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CommodityPrice | Live Market Tracker</title>
-    <link rel="stylesheet" href="style.css">
+    <title>CommodityPrice Live Market Tracker</title>
+    <link rel="stylesheet" href="style.css"> 
+    <style>
+        /* Grafiğin daha şık durması için ufak bir arka plan ayarı */
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        /* Kartların yan yana şık durması için ızgara yapısı */
+        .grid-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Commodity<span>Price</span></h1>
-        <p>Live Market Tracker</p>
-    </header>
 
-    <main class="grid-container" id="market-data">
-        <div class="loading">Piyasa verileri çekiliyor...</div>
-    </main>
+    <div class="header">
+        <h1>CommodityPrice</h1>
+        <p>Live Market Tracker</p>
+    </div>
+
+    <div id="chart-container" style="height: 450px; width: 100%; max-width: 1000px; margin: 30px auto; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.5);"></div>
+
+    <div id="market-data" class="grid-container">
+        <div class="loading">Piyasa verileri yükleniyor, lütfen bekleyin...</div>
+    </div>
 
     <script src="app.js"></script>
 </body>
