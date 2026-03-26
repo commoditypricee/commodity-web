@@ -9,10 +9,13 @@ jobs:
   update-data:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # GitHub'ın data.json dosyasını yazabilmesi için izin
+      contents: write
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true # Bu satır sarı uyarıyı sonsuza dek yok edecek
 
     steps:
       - name: Kodları Çek
+# ... (kodun geri kalanı aynı şekilde devam ediyor) ...
         uses: actions/checkout@v4
 
       - name: Node.js Kurulumu
