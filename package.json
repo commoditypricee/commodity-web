@@ -11,6 +11,6 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "yahoo-finance2": "^2.11.3"
+    "yahoo-finance2": "^2.14.0"
   }
 }
