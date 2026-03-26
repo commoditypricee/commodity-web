@@ -2,10 +2,12 @@ const yahooFinance = require('yahoo-finance2').default;
 
 exports.handler = async function(event, context) {
   try {
-    // Kütüphaneyi her istekte temiz bir şekilde çağırıyoruz
+    // Kütüphane ayarlarını en başta yapıyoruz
+    yahooFinance.setGlobalConfig({ validation: { logErrors: false } });
+
     const symbols = ['GC=F', 'SI=F', 'HG=F', 'BZ=F', 'NG=F'];
     
-    // quote yerine quoteSummary veya doğrudan quote'u statik çağırma yöntemi
+    // Verileri çekiyoruz
     const quotes = await Promise.all(
       symbols.map(sym => yahooFinance.quote(sym))
     );
@@ -27,13 +29,10 @@ exports.handler = async function(event, context) {
     };
     
   } catch (error) {
-    console.error("API Hatası Detayı:", error);
+    console.error("API Hatası:", error.message);
     return {
       statusCode: 500,
-      body: JSON.stringify({ 
-        error: "Veri çekme hatası", 
-        message: error.message 
-      })
+      body: JSON.stringify({ error: error.message })
     };
   }
 };
