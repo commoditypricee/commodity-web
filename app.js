@@ -9,7 +9,7 @@ async function fetchMarketData() {
     
     try {
         // Netlify'daki kendi özel API'mize bağlanıyoruz
-        const response = await fetch('/.netlify/functions/api');
+        const response = await fetch('https://commoditypricee.netlify.app/.netlify/functions/api');
         const data = await response.json();
         
         container.innerHTML = ''; // Yükleniyor yazısını temizle
