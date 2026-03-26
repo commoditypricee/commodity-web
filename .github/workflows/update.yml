@@ -1,0 +1,35 @@
+name: Piyasa Verilerini Guncelle
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Her 15 dakikada bir çalışır
+  workflow_dispatch:
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # GitHub'ın data.json dosyasını yazabilmesi için izin
+
+    steps:
+      - name: Kodları Çek
+        uses: actions/checkout@v4
+
+      - name: Node.js Kurulumu
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Paketleri Yükle
+        run: npm install yahoo-finance2
+
+      - name: Veri Çekiciyi Çalıştır
+        run: node update.js
+
+      - name: Değişiklikleri Kaydet
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git commit -m "🔄 Piyasa verileri güncellendi" || echo "Değişiklik yok"
+          git push
