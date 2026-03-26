@@ -1,26 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
     fetchMarketData();
-    // Verileri her 60 saniyede bir otomatik yenile
-    // 60000 (1 dakika) yerine 300000 (5 dakika) yapalım
-setInterval(fetchMarketData, 300000); 
+    // Sayfayı açık tutanlar için her 1 dakikada bir güncel veriyi kontrol et
+    setInterval(fetchMarketData, 60000); 
 });
 
 async function fetchMarketData() {
     const container = document.getElementById('market-data');
-    
     try {
-        // Netlify'daki kendi özel API'mize bağlanıyoruz
-        const response = await fetch('https://commoditypricee.netlify.app/.netlify/functions/api');
+        // Artık sadece kendi GitHub dosyamızı okuyoruz! Çökme veya limit yok.
+        const response = await fetch('data.json');
         const data = await response.json();
         
-        container.innerHTML = ''; // Yükleniyor yazısını temizle
+        container.innerHTML = ''; 
+        const icons = { 'GC=F': '🥇', 'SI=F': '🥈', 'HG=F': '🥉', 'BZ=F': '🛢️', 'NG=F': '🔥' };
 
-        // İkon eşleştirmeleri
-        const icons = {
-            'GC=F': '🥇', 'SI=F': '🥈', 'HG=F': '🥉', 'BZ=F': '🛢️', 'NG=F': '🔥'
-        };
-
-        // Gelen her emtia için ekranda şık bir kutu (card) oluştur
         data.forEach(item => {
             const isPositive = parseFloat(item.changePercent) >= 0;
             const colorClass = isPositive ? 'positive' : 'negative';
@@ -38,7 +31,7 @@ async function fetchMarketData() {
         });
 
     } catch (error) {
-        container.innerHTML = '<div class="loading negative">Veriler alınırken bir bağlantı sorunu oluştu. Lütfen sayfayı yenileyin.</div>';
-        console.error("Veri çekme hatası:", error);
+        console.error("Veri okuma hatası:", error);
+        container.innerHTML = '<div class="loading">Piyasa verileri güncelleniyor, lütfen saniyeler sonra tekrar deneyin...</div>';
     }
 }
