@@ -2,31 +2,31 @@
   {
     "symbol": "GC=F",
     "name": "Gold Apr 26",
-    "price": "4478.40",
-    "changePercent": "1.57"
+    "price": "4522.40",
+    "changePercent": "2.57"
   },
   {
     "symbol": "SI=F",
     "name": "Silver May 26",
-    "price": "68.53",
-    "changePercent": "0.88"
+    "price": "69.69",
+    "changePercent": "2.58"
   },
   {
     "symbol": "HG=F",
     "name": "Copper May 26",
-    "price": "5.49",
-    "changePercent": "0.22"
+    "price": "5.47",
+    "changePercent": "-0.06"
   },
   {
     "symbol": "BZ=F",
     "name": "Brent Crude Oil Last Day Financ",
-    "price": "103.53",
-    "changePercent": "1.61"
+    "price": "104.47",
+    "changePercent": "2.53"
   },
   {
     "symbol": "NG=F",
     "name": "Natural Gas Apr 26",
-    "price": "2.99",
-    "changePercent": "2.25"
+    "price": "3.01",
+    "changePercent": "2.77"
   }
 ]
