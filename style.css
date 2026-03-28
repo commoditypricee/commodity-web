@@ -1,188 +1,199 @@
-/* --- PROFESYONEL FİNANS TERMİNALİ TASARIMI --- */
-body {
-    background-color: #09090b; /* Tamamen koyu, göz yormayan zemin */
-    color: #fafafa;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* --- SIFIRLAMA VE TEMEL AYARLAR --- */
+* {
+    box-sizing: border-box;
     margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #0f172a; /* Çok şık, derin koyu lacivert/gri */
+    color: #f8fafc;
+    font-family: 'Inter', sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
+    padding-bottom: 40px;
 }
 
 .dashboard-wrapper {
-    max-width: 1400px;
+    max-width: 1300px;
     margin: 0 auto;
-    padding: 30px;
+    padding: 30px 20px;
 }
 
-/* --- NAVİGASYON --- */
+/* --- ÜST MENÜ VE LOGO --- */
 .top-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
-    border-bottom: 1px solid #27272a;
-    padding-bottom: 20px;
 }
 
 .logo { 
-    font-size: 24px; 
+    font-size: 26px; 
     font-weight: 700; 
     letter-spacing: -0.5px; 
     color: #ffffff;
-}
-.logo span { color: #71717a; font-weight: 400; }
-
-/* Sade, kutusuz, net saat gösterimi */
-.clock-pill {
-    font-size: 15px; 
-    color: #a1a1aa;
-    font-weight: 500;
     display: flex;
     align-items: center;
-    letter-spacing: 0.5px;
+    gap: 8px;
 }
 
-/* --- ANA YAPI --- */
+.logo span { 
+    color: #3b82f6; 
+}
+
+/* --- SAAT VE TARİH KUTUSU --- */
+.clock-pill {
+    background: #1e293b;
+    border: 1px solid #334155;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 15px; 
+    color: #cbd5e1;
+    font-weight: 500;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+}
+
+/* --- ANA IZGARA --- */
 .bento-grid {
     display: grid;
-    grid-template-columns: 2.5fr 1fr; /* Grafik alanı daha da genişletildi */
-    gap: 20px;
-    height: auto;
-    min-height: calc(100vh - 150px);
+    grid-template-columns: 2.5fr 1fr;
+    gap: 24px;
+    align-items: start;
 }
 
-/* --- SOL: GRAFİK ALANI (Tamamen Düz ve Keskin) --- */
+/* --- SOL: GRAFİK ALANI --- */
 .main-chart-wrapper {
-    background: #0f0f11;
-    border: 1px solid #27272a;
-    border-radius: 6px; /* Keskin hatlar */
-    display: flex;
-    flex-direction: column;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
     padding: 24px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #27272a;
-    padding-bottom: 15px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 #chart-title {
-    margin: 0;
-    font-size: 18px;
-    color: #ffffff;
+    font-size: 20px;
+    color: #f1f5f9;
     font-weight: 600;
     letter-spacing: 0.5px;
 }
 
-/* Klasik Borsa Filtre Butonları */
+/* Filtre Butonları */
 .time-filters {
     display: flex;
-    gap: 4px;
+    background: #0f172a;
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid #334155;
 }
 
 .time-btn {
     background: transparent;
-    border: 1px solid transparent;
-    color: #a1a1aa;
+    border: none;
+    color: #94a3b8;
     padding: 6px 14px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
 }
 
-.time-btn:hover { color: #fafafa; }
+.time-btn:hover { 
+    color: #f8fafc; 
+}
 
 .time-btn.active {
-    background: #27272a; 
+    background: #3b82f6; 
     color: #ffffff;
-    border-color: #3f3f46;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
 }
 
 .main-chart {
-    flex-grow: 1;
-    min-height: 450px;
+    height: 450px;
+    width: 100%;
 }
 
-/* --- SAĞ: KARTLAR ALANI --- */
+/* --- SAĞ: EMTİA KARTLARI --- */
 .cards-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 12px; /* Kartlar arası boşluk azaltıldı, daha derli toplu */
-    height: auto;
+    gap: 16px;
 }
 
-body::-webkit-scrollbar { width: 6px; }
-body::-webkit-scrollbar-track { background: #09090b; }
-body::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-body::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
-
-/* --- KART TASARIMLARI (Pavyon Değil, Terminal) --- */
 .card {
-    background: #0f0f11;
-    border: 1px solid #27272a;
-    border-radius: 6px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
     padding: 20px;
     display: flex;
     justify-content: space-between; 
     align-items: center;
     cursor: pointer;
-    transition: border-color 0.2s ease, background 0.2s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .card:hover {
-    border-color: #52525b; /* Sadece zarif bir çerçeve rengi değişimi */
-    background: #18181b;
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
 }
 
 .card-info h2 {
-    margin: 0 0 4px 0;
-    font-size: 13px;
-    color: #a1a1aa;
+    margin: 0 0 6px 0;
+    font-size: 14px;
+    color: #94a3b8;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 .card-info .price {
     font-size: 24px;
-    color: #ffffff;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums; /* Rakamların hizalı durması için finansal standart */
+    color: #f8fafc;
+    font-weight: 700;
 }
 
-/* --- ROZETLER (Tamamen Düz, Gölgesiz) --- */
-.card-status { text-align: right; }
-
+/* Yüzde Rozetleri */
 .badge {
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
-    display: inline-block;
 }
 
-/* Borsa Standardı Keskin Renkler */
 .positive { 
-    background: rgba(16, 185, 129, 0.1); 
-    color: #10b981; 
+    background: rgba(16, 185, 129, 0.15); 
+    color: #34d399; 
 }
 
 .negative { 
-    background: rgba(239, 68, 68, 0.1); 
-    color: #ef4444; 
+    background: rgba(244, 63, 94, 0.15); 
+    color: #fb7185; 
 }
 
-/* MOBİL UYUM */
+/* Kaydırma Çubuğu Özelleştirmesi */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #0f172a; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* Mobil Uyumluluk */
 @media (max-width: 1024px) {
     .bento-grid { grid-template-columns: 1fr; }
     .chart-header { flex-direction: column; gap: 15px; align-items: flex-start; }
-    .time-filters { width: 100%; overflow-x: auto; }
+    .time-filters { width: 100%; justify-content: space-between; }
     .main-chart { height: 350px; }
 }
