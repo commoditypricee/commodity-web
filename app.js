@@ -6,6 +6,7 @@ function updateClock() {
 
 let mainApexChart = null; 
 let currentItemHistory = []; 
+let currentSymbolName = 'GOLD'; // Başlık için isim hafızası
 
 document.addEventListener("DOMContentLoaded", () => {
     updateClock();
@@ -13,67 +14,94 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchMarketData(true); 
     setInterval(() => fetchMarketData(false), 60000); 
     
-    // BUTONLARA TIKLAMA OLAYI
+    // YENİ BUTON TIKLAMA OLAYI (Kusursuz Kesim Mantığı)
     document.querySelectorAll('.time-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
+            // Aktif butonu değiştir
             document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
-            zoomChart(e.target.getAttribute('data-range'));
+            
+            // Kaç günlük veri istediğini ve buton ismini al
+            const days = parseInt(e.target.getAttribute('data-days'));
+            const text = e.target.textContent;
+            
+            applyTimeFilter(days, text);
         });
     });
 });
 
-// GRAFİĞİ ZAMAN BUTONLARINA GÖRE YAKINLAŞTIR
-function zoomChart(range) {
+// YENİ: VERİYİ GÜN SAYISINA GÖRE KESİP GRAFİĞİ GÜNCELLEME (Asla Çökmez)
+function applyTimeFilter(days, timeframeText) {
     if (!mainApexChart || currentItemHistory.length === 0) return;
 
-    // En son verinin tarihini "şimdi" kabul edelim (sağda boşluk kalmaması için)
+    // Hedeflenen tarihi bul
     const lastDate = currentItemHistory[currentItemHistory.length - 1].x;
-    let minDate;
+    const cutoffDate = lastDate - (days * 24 * 60 * 60 * 1000);
 
-    switch(range) {
-        case '1W': minDate = lastDate - (7 * 24 * 60 * 60 * 1000); break;
-        case '1M': minDate = lastDate - (30 * 24 * 60 * 60 * 1000); break;
-        case '3M': minDate = lastDate - (90 * 24 * 60 * 60 * 1000); break;
-        case '6M': minDate = lastDate - (180 * 24 * 60 * 60 * 1000); break;
-        case '1Y': minDate = lastDate - (365 * 24 * 60 * 60 * 1000); break;
-        case '5Y': minDate = currentItemHistory[0].x; break; 
-    }
+    // İstenilen tarihten sonrasını kesip al
+    const filteredData = currentItemHistory.filter(item => item.x >= cutoffDate);
 
-    mainApexChart.zoomX(minDate, lastDate);
+    // Yeni çizim için en alt ve en üst fiyatı bul (Y eksenini ayarlamak için)
+    const prices = filteredData.map(h => h.y);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+
+    // 1. Grafiğin verisini güncelle (Animasyonlu)
+    mainApexChart.updateSeries([{ data: filteredData }]);
+    
+    // 2. Grafiğin fiyat eksenini (Y ekseni) yeni verilere göre otomatik sıkıştır!
+    mainApexChart.updateOptions({
+        yaxis: {
+            min: minPrice - (minPrice * 0.01),
+            max: maxPrice + (maxPrice * 0.01)
+        }
+    });
+
+    // 3. Başlığı güncelle (Örn: "GOLD (1 Month)")
+    document.getElementById('chart-title').textContent = `${currentSymbolName.toUpperCase()} (${timeframeText})`;
 }
 
-// SADE, TEK RENK ÇİZGİ GRAFİĞİ (Ortaokul Matematiği Mantığı)
+// SADE, TEK RENK ÇİZGİ GRAFİĞİ BAŞLANGICI
 function loadCustomApexChart(item) {
     const container = document.getElementById('chart-container');
     currentItemHistory = item.history; 
+    currentSymbolName = item.name;
     
+    // İlk açılışta hangi buton aktifse ona göre veriyi kes (Örn: 1 Month -> 30 gün)
+    const activeBtn = document.querySelector('.time-btn.active');
+    const days = activeBtn ? parseInt(activeBtn.getAttribute('data-days')) : 30;
+    const btnText = activeBtn ? activeBtn.textContent : '1 Month';
+
+    // Başlığı ekle
+    document.getElementById('chart-title').textContent = `${item.name.toUpperCase()} (${btnText})`;
+
+    // İlk veriyi kes
+    const lastDate = currentItemHistory[currentItemHistory.length - 1].x;
+    const cutoffDate = lastDate - (days * 24 * 60 * 60 * 1000);
+    const filteredData = currentItemHistory.filter(h => h.x >= cutoffDate);
+
+    const prices = filteredData.map(h => h.y);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+
     if (mainApexChart) { mainApexChart.destroy(); }
 
     const options = {
-        series: [{ name: 'Price', data: item.history }],
+        series: [{ name: 'Price', data: filteredData }],
         chart: {
-            type: 'line', // SADECE ÇİZGİ
+            type: 'line',
             height: '100%',
             width: '100%',
             background: 'transparent', 
             fontFamily: 'Outfit, sans-serif',
             toolbar: { show: false }, 
-            animations: { enabled: false }, // Zoom anında kasmasın diye kapalı
+            animations: { enabled: true, easing: 'easeinout', speed: 400 } // Artık kasmadan animasyon yapabilir
         },
         colors: ['#3b82f6'], // Kraliyet Mavisi
         stroke: { curve: 'straight', width: 2 }, 
         
-        // EKRANDA SABİT RAKAM YOK, İMLEÇLE ÜSTÜNE GELİNCE GÖRÜNÜR
         markers: { size: 0, hover: { size: 6 } }, 
         dataLabels: { enabled: false }, 
-
-        title: {
-            text: item.name.toUpperCase(),
-            align: 'left',
-            margin: 20,
-            style: { fontSize: '18px', fontWeight: 600, color: '#ffffff', letterSpacing: '1px' }
-        },
 
         tooltip: {
             theme: 'dark',
@@ -81,7 +109,6 @@ function loadCustomApexChart(item) {
             y: { formatter: (value) => `$${value.toFixed(2)}` } 
         },
 
-        // YATAY EKSEN (Tarihler Altta)
         xaxis: {
             type: 'datetime',
             labels: { style: { colors: '#94a3b8', fontSize: '12px', fontFamily: 'Outfit' } },
@@ -90,9 +117,10 @@ function loadCustomApexChart(item) {
             tooltip: { enabled: false }
         },
 
-        // DİKEY EKSEN (Fiyatlar Solda)
         yaxis: {
-            opposite: false, // SOL TARAFTA
+            opposite: false, 
+            min: minPrice - (minPrice * 0.01),
+            max: maxPrice + (maxPrice * 0.01),
             labels: {
                 style: { colors: '#94a3b8', fontSize: '13px', fontFamily: 'Outfit' },
                 formatter: (value) => `$${value.toFixed(1)}`
@@ -102,7 +130,7 @@ function loadCustomApexChart(item) {
         grid: {
             show: true,
             borderColor: '#1e293b',
-            strokeDashArray: 0, // Düz kareli defter çizgisi
+            strokeDashArray: 0, 
             xaxis: { lines: { show: true } }, 
             yaxis: { lines: { show: true } }, 
             padding: { top: 10, right: 20, bottom: 0, left: 10 }
@@ -110,10 +138,7 @@ function loadCustomApexChart(item) {
     };
 
     mainApexChart = new ApexCharts(container, options);
-    mainApexChart.render().then(() => {
-        const activeBtn = document.querySelector('.time-btn.active');
-        if(activeBtn) zoomChart(activeBtn.getAttribute('data-range'));
-    });
+    mainApexChart.render();
 }
 
 async function fetchMarketData(isFirstLoad = false) {
