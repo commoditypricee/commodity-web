@@ -2,51 +2,47 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchMarketData();
     setInterval(fetchMarketData, 60000); 
     
-    // Sayfa ilk açıldığında varsayılan olarak Altın grafiğini yükle
-    loadTradingViewChart('GC=F');
+    // TradingView kütüphanesi hazır olsun diye yarım saniye gecikmeli başlatıyoruz
+    setTimeout(() => loadTradingViewChart('GC=F'), 500);
 });
 
-// Yahoo sembollerini TradingView sembollerine çeviren sözlüğümüz
+// En sorunsuz TradingView sembolleri
 const tvSymbols = {
     'GC=F': 'COMEX:GC1!', // Altın
     'SI=F': 'COMEX:SI1!', // Gümüş
     'HG=F': 'COMEX:HG1!', // Bakır
-    'BZ=F': 'NYMEX:BZ1!', // Brent Petrol
+    'BZ=F': 'TVC:UKOIL',  // Brent Petrol (En stabil grafik)
     'NG=F': 'NYMEX:NG1!'  // Doğalgaz
 };
 
-// Grafiği ekrana çizen özel fonksiyon
 function loadTradingViewChart(symbol) {
-    const container = document.getElementById('chart-container');
-    container.innerHTML = ''; // Eski grafiği temizle
-
     const activeSymbol = tvSymbols[symbol] || 'COMEX:GC1!';
-
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = 'https://s3.tradingview.com/tv.js';
-    script.onload = () => {
+    
+    // TradingView kütüphanesi gerçekten yüklendi mi diye kontrol ediyoruz
+    if (typeof TradingView !== 'undefined') {
         new TradingView.widget({
             "autosize": true,
             "symbol": activeSymbol,
-            "interval": "D", // Günlük grafik (İstersen "60" yapıp saatliğe çevirebilirsin)
+            "interval": "D",
             "timezone": "Europe/Istanbul",
             "theme": "dark",
-            "style": "2", // 1: Mum grafik, 2: Çizgi grafik (Goldprice stili), 3: Alan grafiği
+            "style": "2",
             "locale": "tr",
             "enable_publishing": false,
-            "backgroundColor": "#1a1a1a",
+            "backgroundColor": "#121212",
             "gridColor": "#2c2c2c",
             "hide_top_toolbar": false,
             "hide_legend": false,
             "save_image": false,
             "container_id": "chart-container"
         });
-    };
-    container.appendChild(script);
+    } else {
+        // Eğer reklam engelleyici TradingView'u engellediyse kullanıcıyı uyarıyoruz
+        document.getElementById('chart-container').innerHTML = 
+            '<p style="color:gray; text-align:center; padding-top:200px;">Grafik yüklenemedi. Lütfen reklam engelleyicinizi (AdBlock) kapatıp sayfayı yenileyin.</p>';
+    }
 }
 
-// Verileri çekme ve kartları oluşturma
 async function fetchMarketData() {
     const container = document.getElementById('market-data');
     try {
@@ -64,7 +60,6 @@ async function fetchMarketData() {
 
             const card = document.createElement('div');
             card.className = 'card';
-            // Tıklanabilir efekti için cursor ekledik
             card.style.cursor = 'pointer'; 
             
             card.innerHTML = `
@@ -73,11 +68,8 @@ async function fetchMarketData() {
                 <div class="change ${colorClass}">${sign}${item.changePercent}%</div>
             `;
             
-            // Karta tıklandığında üstteki grafiği o ürüne çevir!
             card.addEventListener('click', () => {
                 loadTradingViewChart(item.symbol);
-                
-                // Tıklanan karta ufak bir parlama efekti verelim
                 card.style.transform = 'scale(0.95)';
                 setTimeout(() => card.style.transform = 'scale(1)', 150);
             });
