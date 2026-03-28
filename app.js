@@ -1,4 +1,3 @@
-// DİNAMİK EMOJİLER (Simgeler yerine geçer, hata vermez)
 const getEmojiIcon = (name) => {
     const n = name.toUpperCase();
     if (n.includes('GOLD')) return '🥇';
@@ -38,85 +37,85 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
             const days = parseInt(btn.getAttribute('data-days'));
             if (isNaN(days)) return;
-
             applyTimeFilter(days);
             updateCardPercentages(days); 
         });
     });
 });
 
-// YENİ: DİKEY PERFORMANS TABLOSU MOTORU
-function renderVerticalPerformanceTable(item) {
+// GOLDPRICE.ORG STİLİ BİREBİR TABLO OLUŞTURUCU
+function renderGoldPriceTable(item) {
     const container = document.getElementById('perf-stats');
     if (!container) return;
 
     const periods = [
-        { label: '1 Day Return', days: 1 },
-        { label: '1 Week Return', days: 7 },
-        { label: '1 Month Return', days: 30 },
-        { label: '1 Year Return', days: 365 },
-        { label: '5 Years Return', days: 1825 }
+        { label: 'Today', days: 1 },
+        { label: '30 Days', days: 30 },
+        { label: '6 Months', days: 180 },
+        { label: '1 Year', days: 365 },
+        { label: '5 Years', days: 1825 }
     ];
 
-    let html = '';
+    let tbodyHtml = '';
     const history = item.history || [];
 
     periods.forEach(p => {
         let changePercent = 0;
+        let changeAmount = 0;
         
         if (p.days === 1) {
              changePercent = parseFloat(item.changePercent);
+             const currentPrice = history.length > 0 ? history[history.length-1].y : item.price;
+             changeAmount = currentPrice - (currentPrice / (1 + (changePercent/100)));
         } else if (history.length > 0) {
             const lastData = history[history.length - 1];
             const currentPrice = lastData.y;
             const cutoffDate = lastData.x - (p.days * 24 * 60 * 60 * 1000);
             const filteredData = history.filter(h => h.x >= cutoffDate);
             
-            if (filteredData.length > 0) {
-                const startPrice = filteredData[0].y;
-                changePercent = ((currentPrice - startPrice) / startPrice) * 100;
-            } else {
-                const startPrice = history[0].y;
-                changePercent = ((currentPrice - startPrice) / startPrice) * 100;
-            }
+            let startPrice = history[0].y;
+            if (filteredData.length > 0) startPrice = filteredData[0].y;
+            
+            changeAmount = currentPrice - startPrice;
+            changePercent = (changeAmount / startPrice) * 100;
         }
 
         const isPos = changePercent >= 0;
-        const color = isPos ? '#10b981' : '#ef4444';
+        const colorClass = isPos ? 'gp-positive' : 'gp-negative';
         const sign = isPos ? '+' : '';
 
-        html += `
-            <div class="stat-box">
-                <div class="stat-label">${p.label}</div>
-                <div class="stat-value" style="color: ${color}">${sign}${changePercent.toFixed(2)}%</div>
-            </div>
+        tbodyHtml += `
+            <tr>
+                <td>${p.label}</td>
+                <td class="right-align ${colorClass}">${sign}${changeAmount.toFixed(2)}</td>
+                <td class="right-align ${colorClass}">${sign}${changePercent.toFixed(2)}%</td>
+            </tr>
         `;
     });
 
-    container.innerHTML = html;
-}
+    const title = `${item.name.toUpperCase()} Price Performance USD`;
 
-// FİYATLARI PROFESYONEL "MUM (CANDLESTICK)" GRAFİĞİNE ÇEVİREN YAPAY ZEKA FONKSİYONU
-function convertToCandlestick(dataArray) {
-    return dataArray.map((item, index) => {
-        let close = item.y;
-        let open = index === 0 ? close : dataArray[index-1].y;
-        let volatility = close * 0.0005; // Fiyatın %0.05'i kadar dalgalanma efekti
-        let high = Math.max(open, close) + (Math.random() * volatility);
-        let low = Math.min(open, close) - (Math.random() * volatility);
-        
-        return {
-            x: item.x,
-            y: [open, high, low, close] // [Açılış, En Yüksek, En Düşük, Kapanış]
-        };
-    });
+    container.innerHTML = `
+        <div class="gp-table-wrapper">
+          <table class="gp-table">
+            <thead>
+              <tr>
+                <th>${title}</th>
+                <th class="right-align">Change Amount</th>
+                <th class="right-align">%</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tbodyHtml}
+            </tbody>
+          </table>
+        </div>
+    `;
 }
 
 function updateCardPercentages(days) {
-    // ... kart yüzdelikleri aynı kalıyor ...
     if (!globalMarketData || globalMarketData.length === 0) return;
     globalMarketData.forEach(item => {
         const cardBadge = document.querySelector(`.card[data-name="${item.name}"] .badge`);
@@ -152,8 +151,7 @@ function applyTimeFilter(days) {
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
 
-    // MUM GRAFİĞİNE ÇEVİRİP GÖNDERİYORUZ
-    mainApexChart.updateSeries([{ name: 'Price', data: convertToCandlestick(filteredData) }]);
+    mainApexChart.updateSeries([{ name: 'Price', data: filteredData }]);
     
     mainApexChart.updateOptions({
         xaxis: {
@@ -184,8 +182,8 @@ function loadCustomApexChart(item) {
     const camelName = item.name.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     document.getElementById('chart-title').textContent = `${camelName} Price`;
 
-    // TABLOYU OTOMATİK DOLDUR
-    renderVerticalPerformanceTable(item);
+    // TABLOYU DOLDUR
+    renderGoldPriceTable(item);
 
     let filteredData = [];
     if (days === 1) {
@@ -201,36 +199,54 @@ function loadCustomApexChart(item) {
 
     if (mainApexChart) { mainApexChart.destroy(); }
 
-    // GERÇEK TRADINGVİEW TARZI MUM (CANDLESTICK) AYARLARI
+    // MODERN YENİ NESİL GRAFİK (APPLE STOCKS / ROBINHOOD STİLİ)
     const options = {
-        series: [{ name: 'Price', data: convertToCandlestick(filteredData) }],
+        series: [{ name: 'Price', data: filteredData }],
         chart: {
-            type: 'candlestick', // İŞTE ORTAOKULDAN ÇIKTIĞIMIZ YER!
+            type: 'area', // Gölge destekli modern akış
             height: '100%',
             width: '100%',
             background: 'transparent', 
             fontFamily: 'Inter, sans-serif',
             toolbar: { show: false }, 
-            animations: { enabled: false } // Mum grafiklerinde animasyon kapalı olur
-        },
-        plotOptions: {
-            candlestick: {
-                colors: {
-                    upward: '#10b981', // Yükseliş yeşil
-                    downward: '#ef4444' // Düşüş kırmızı
-                },
-                wick: { useFillColor: true }
+            animations: { enabled: true, easing: 'easeinout', speed: 500 },
+            dropShadow: { // Pürüzsüz parlama efekti
+                enabled: true,
+                color: '#3b82f6',
+                top: 6,
+                left: 0,
+                blur: 4,
+                opacity: 0.1
             }
         },
+        colors: ['#3b82f6'], 
+        stroke: { curve: 'smooth', width: 3 }, // Pürüzsüz ve kalın, çok daha profesyonel
+        
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.25, 
+                opacityTo: 0.0,  
+                stops: [0, 90, 100]
+            }
+        },
+
+        markers: { size: 0, hover: { size: 6 } }, 
+        dataLabels: { enabled: false }, 
+
         tooltip: {
             theme: 'light',
-            style: { fontSize: '12px', fontFamily: 'Inter' }
+            x: { format: days === 1 ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }, 
+            y: { formatter: (value) => `$${value.toFixed(2)}` },
+            style: { fontSize: '13px', fontFamily: 'Inter' }
         },
+
         xaxis: {
             type: 'datetime',
             tickAmount: days >= 365 ? 5 : 6,
             labels: { 
-                style: { colors: '#71717a', fontSize: '12px', fontFamily: 'Inter' },
+                style: { colors: '#64748b', fontSize: '12px', fontFamily: 'Inter', fontWeight: 500 },
                 datetimeUTC: false,
                 formatter: function(val) {
                     if (!val) return '';
@@ -243,18 +259,21 @@ function loadCustomApexChart(item) {
             axisBorder: { show: false }, 
             axisTicks: { show: false }
         },
+
         yaxis: {
             opposite: false, 
             min: minPrice - (minPrice * 0.002),
             max: maxPrice + (maxPrice * 0.002),
             labels: {
-                style: { colors: '#71717a', fontSize: '12px', fontFamily: 'Inter' },
+                style: { colors: '#64748b', fontSize: '12px', fontFamily: 'Inter', fontWeight: 600 },
                 formatter: (value) => `$${value.toFixed(2)}`
             }
         },
+
         grid: {
-            show: true, borderColor: '#e2e8f0', strokeDashArray: 4, 
-            xaxis: { lines: { show: true } }, yaxis: { lines: { show: true } }, 
+            show: true, borderColor: '#f1f5f9', strokeDashArray: 0, 
+            xaxis: { lines: { show: false } }, // Dikey çizgileri kapattık, sadece yataylar var
+            yaxis: { lines: { show: true } }, 
             padding: { top: 10, right: 20, bottom: 20, left: 10 }
         }
     };
