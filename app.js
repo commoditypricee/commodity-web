@@ -77,11 +77,9 @@ function applyTimeFilter(days, timeframeText) {
     let isIntraday = (days === 1);
 
     if (isIntraday) {
-        // GÜVENLİK KONTROLÜ: Eğer bot veriyi henüz çekmediyse grafiği boş bırakma!
         if (currentItemIntraday && currentItemIntraday.length > 0) {
             filteredData = currentItemIntraday; 
         } else {
-            console.warn("Saatlik veri henüz JSON'da yok! GitHub Botunun çalışması bekleniyor.");
             const lastDate = currentItemHistory[currentItemHistory.length - 1].x;
             const cutoffDate = lastDate - (24 * 60 * 60 * 1000);
             filteredData = currentItemHistory.filter(item => item.x >= cutoffDate);
@@ -101,8 +99,21 @@ function applyTimeFilter(days, timeframeText) {
 
     mainApexChart.updateSeries([{ data: filteredData }]);
     
-    // SADECE GEREKLİLERİ GÜNCELLE, EKSENİ BOZMA
     mainApexChart.updateOptions({
+        xaxis: {
+            // EKSENİ ZORLA 8 EŞİT PARÇAYA BÖL (Sorunu çözen anahtar burası)
+            tickAmount: isIntraday ? 8 : 6,
+            labels: {
+                formatter: function(val) {
+                    if (!val) return '';
+                    const date = new Date(val);
+                    if (isIntraday) {
+                        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    }
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                }
+            }
+        },
         yaxis: {
             min: minPrice - (minPrice * 0.002),
             max: maxPrice + (maxPrice * 0.002)
@@ -179,15 +190,18 @@ function loadCustomApexChart(item) {
 
         xaxis: {
             type: 'datetime',
+            // GRAFİK İLK YÜKLENDİĞİNDE DE 8 PARÇAYA BÖL
+            tickAmount: isIntraday ? 8 : 6,
             labels: { 
                 style: { colors: '#94a3b8', fontSize: '12px', fontFamily: 'Outfit' },
                 datetimeUTC: false,
-                // APEXCHARTS'IN KENDİ OTOMATİK ZAMAN MOTORU (Burası hatayı çözdü)
-                datetimeFormatter: {
-                    year: 'yyyy',
-                    month: 'MMM \'yy',
-                    day: 'dd MMM',
-                    hour: 'HH:mm'
+                formatter: function(val) {
+                    if (!val) return '';
+                    const date = new Date(val);
+                    if (isIntraday) {
+                        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    }
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 }
             },
             axisBorder: { show: true, color: '#334155' }, 
