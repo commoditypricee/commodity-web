@@ -171,11 +171,11 @@ function loadCustomApexChart(item) {
     const options = {
         series: [{ name: 'Price', data: filteredData }],
         chart: {
-            type: 'line', // AREA YERİNE CİDDİ ÇİZGİ GRAFİĞİ (Line) YAPILDI
+            type: 'line', 
             height: '100%',
             width: '100%',
             background: 'transparent', 
-            fontFamily: 'Inter, sans-serif', // FONT DEĞİŞTİ
+            fontFamily: 'Inter, sans-serif',
             toolbar: { show: false }, 
             animations: { enabled: true, easing: 'easeinout', speed: 300 } 
         },
@@ -228,7 +228,7 @@ function loadCustomApexChart(item) {
         grid: {
             show: true,
             borderColor: '#27272a',
-            strokeDashArray: 3, // Izgara çizgileri kesikli yapıldı (daha profesyonel)
+            strokeDashArray: 3, 
             xaxis: { lines: { show: true } }, 
             yaxis: { lines: { show: true } }, 
             padding: { top: 10, right: 20, bottom: 40, left: 10 }
@@ -273,7 +273,6 @@ async function fetchMarketData(isFirstLoad = false) {
                 </div>
             `;
             
-            // Zıplama animasyonunu sildik, yerine sadece grafiği çağırma komutu bıraktık. CSS hover yeterli.
             card.addEventListener('click', () => {
                 loadCustomApexChart(item); 
             });
