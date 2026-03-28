@@ -1,9 +1,9 @@
 const fs = require('fs');
-const https = require('https'); 
+const https = require('https');
 
 function getYahooData(symbol) {
     return new Promise((resolve, reject) => {
-        // İŞTE SİHİR BURADA: range=1mo yerine range=5y yazdık. Artık 5 yıllık veri çekecek!
+        // 5 yıllık günlük veri çekiyoruz (range=5y)
         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=5y`;
         
         https.get(url, {
@@ -56,6 +56,7 @@ async function updateData() {
                 changePercent: changePercent.toFixed(2),
                 history: history 
             });
+            console.log(`[BAŞARILI] ${sym} çekildi.`);
         } catch (error) {
             console.error(`Hata ${sym}:`, error.message);
         }
@@ -63,6 +64,7 @@ async function updateData() {
 
     if (finalData.length > 0) {
         fs.writeFileSync('data.json', JSON.stringify(finalData, null, 2));
+        console.log("Kasa 5 yıllık verilerle doldu!");
     } else {
         process.exit(1); 
     }
