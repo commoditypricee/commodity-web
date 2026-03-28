@@ -6,7 +6,7 @@ function updateClock() {
 
 let mainApexChart = null; 
 let currentItemHistory = []; 
-let currentItemIntraday = []; // 1 Günlük veriler için eklendi
+let currentItemIntraday = []; 
 let currentSymbolName = 'GOLD'; 
 let globalMarketData = []; 
 
@@ -25,12 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const days = parseInt(btn.getAttribute('data-days'));
             const text = btn.textContent;
             
-            console.log(`[TEST] Butona tıklandı. Süre: ${text}, Gün Sayısı: ${days}`);
-            
-            if (isNaN(days)) {
-                console.error("[HATA] Gün sayısı (data-days) okunamadı! HTML dosyasındaki data-days özelliğini kontrol et.");
-                return;
-            }
+            if (isNaN(days)) return;
 
             applyTimeFilter(days, text);
             updateCardPercentages(days); 
@@ -39,20 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function updateCardPercentages(days) {
-    if (!globalMarketData || globalMarketData.length === 0) {
-        console.warn("[TEST] globalMarketData boş, kartlar güncellenemiyor.");
-        return;
-    }
-
-    console.log(`[TEST] Yüzdeler ${days} gün öncesine göre hesaplanıyor...`);
+    if (!globalMarketData || globalMarketData.length === 0) return;
 
     globalMarketData.forEach(item => {
         const cardBadge = document.querySelector(`.card[data-name="${item.name}"] .badge`);
         if (!cardBadge) return;
 
         let changePercent = 0;
-        
-        // 1 gün seçiliyse intraday (gün içi) verisinden, değilse history (uzun vade) verisinden hesapla
         let targetHistory = (days === 1 && item.intraday && item.intraday.length > 0) ? item.intraday : item.history;
         
         if (targetHistory && targetHistory.length > 0) {
@@ -66,7 +54,6 @@ function updateCardPercentages(days) {
             if (filteredData.length > 0) {
                  const startPrice = filteredData[0].y;
                  changePercent = ((currentPrice - startPrice) / startPrice) * 100;
-                 console.log(`[TEST] ${item.name} | Eski Fiyat: ${startPrice}, Yeni Fiyat: ${currentPrice}, Değişim: %${changePercent.toFixed(2)}`);
             } else {
                  changePercent = parseFloat(item.changePercent); 
             }
@@ -78,7 +65,6 @@ function updateCardPercentages(days) {
         const colorClass = isPositive ? 'positive' : 'negative';
         const sign = isPositive ? '+' : '';
 
-        // Eski classları temizleyip sadece ilgili classları veriyoruz
         cardBadge.className = `badge ${colorClass}`;
         cardBadge.textContent = `${sign}${changePercent.toFixed(2)}%`;
     });
@@ -91,7 +77,7 @@ function applyTimeFilter(days, timeframeText) {
     let isIntraday = (days === 1);
 
     if (isIntraday) {
-        filteredData = currentItemIntraday; // 1 gün için gün içi verisi
+        filteredData = currentItemIntraday; 
     } else {
         if(currentItemHistory.length === 0) return;
         const lastDate = currentItemHistory[currentItemHistory.length - 1].x;
@@ -107,6 +93,7 @@ function applyTimeFilter(days, timeframeText) {
 
     mainApexChart.updateSeries([{ data: filteredData }]);
     
+    // EKSENLERİ GÜNCELLEME (HATA BURADAYDI, DÜZELTİLDİ)
     mainApexChart.updateOptions({
         yaxis: {
             min: minPrice - (minPrice * 0.002),
@@ -114,12 +101,7 @@ function applyTimeFilter(days, timeframeText) {
         },
         xaxis: {
             labels: {
-                formatter: function(val) {
-                    if (isIntraday) {
-                        return new Date(val).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-                    }
-                    return new Date(val).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                }
+                format: isIntraday ? 'HH:mm' : 'dd MMM' // 1 Gün ise Saat, değilse Gün/Ay
             }
         },
         tooltip: {
@@ -135,11 +117,10 @@ function applyTimeFilter(days, timeframeText) {
 function loadCustomApexChart(item) {
     const container = document.getElementById('chart-container');
     currentItemHistory = item.history; 
-    currentItemIntraday = item.intraday || []; // Yeni eklenen gün içi veri
+    currentItemIntraday = item.intraday || []; 
     currentSymbolName = item.name;
     
     const activeBtn = document.querySelector('.time-btn.active');
-    // Eğer aktif buton yoksa varsayılan 1 gün olsun (tasarıma göre değiştirebilirsin)
     const days = activeBtn ? parseInt(activeBtn.getAttribute('data-days')) : 1;
     const btnText = activeBtn ? activeBtn.textContent : '1 Day';
 
@@ -191,90 +172,7 @@ function loadCustomApexChart(item) {
             type: 'datetime',
             labels: { 
                 style: { colors: '#94a3b8', fontSize: '12px', fontFamily: 'Outfit' },
-                formatter: function(val) {
-                    if (isIntraday) {
-                        return new Date(val).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-                    }
-                    return new Date(val).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                }
+                format: isIntraday ? 'HH:mm' : 'dd MMM', // İLK YÜKLEMEDEKİ AYAR
+                datetimeUTC: false // Yerel saati baz alması için
             },
-            axisBorder: { show: true, color: '#334155' }, 
-            axisTicks: { show: true, color: '#334155' },
-            tooltip: { enabled: false }
-        },
-
-        yaxis: {
-            opposite: false, 
-            min: minPrice - (minPrice * 0.002),
-            max: maxPrice + (maxPrice * 0.002),
-            labels: {
-                style: { colors: '#94a3b8', fontSize: '13px', fontFamily: 'Outfit' },
-                formatter: (value) => `$${value.toFixed(2)}`
-            }
-        },
-
-        grid: {
-            show: true,
-            borderColor: '#1e293b',
-            strokeDashArray: 0, 
-            xaxis: { lines: { show: true } }, 
-            yaxis: { lines: { show: true } }, 
-            padding: { top: 10, right: 20, bottom: 0, left: 10 }
-        }
-    };
-
-    mainApexChart = new ApexCharts(container, options);
-    mainApexChart.render();
-}
-
-async function fetchMarketData(isFirstLoad = false) {
-    const container = document.getElementById('market-data');
-    try {
-        const response = await fetch('data.json?v=' + new Date().getTime());
-        const data = await response.json();
-        
-        if (!data || data.length === 0) return;
-        
-        globalMarketData = data; 
-        container.innerHTML = ''; 
-
-        data.forEach((item, index) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.setAttribute('data-name', item.name); 
-            
-            if (isFirstLoad && index === 0) {
-                setTimeout(() => loadCustomApexChart(item), 100);
-            }
-
-            const isPositive = parseFloat(item.changePercent) >= 0;
-            const colorClass = isPositive ? 'positive' : 'negative';
-            const sign = isPositive ? '+' : '';
-
-            card.innerHTML = `
-                <div class="card-info">
-                    <h2>${item.name}</h2>
-                    <div class="price">$${item.price}</div>
-                </div>
-                <div class="card-status">
-                    <div class="badge ${colorClass}">${sign}${item.changePercent}%</div>
-                </div>
-            `;
-            
-            card.addEventListener('click', () => {
-                loadCustomApexChart(item); 
-                card.style.transform = 'scale(0.98)';
-                setTimeout(() => card.style.transform = 'translateX(-5px)', 150);
-            });
-
-            container.appendChild(card);
-        });
-
-        const activeBtn = document.querySelector('.time-btn.active');
-        const days = activeBtn ? parseInt(activeBtn.getAttribute('data-days')) : 1; 
-        updateCardPercentages(days);
-
-    } catch (error) {
-        console.error("Veri çekme hatası:", error);
-    }
-}
+            axisBorder: { show: true, color: '#334155' },
