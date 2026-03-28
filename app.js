@@ -17,7 +17,8 @@ function updateClock() {
     if(clockEl) {
         const datePart = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         const timePart = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-        clockEl.innerHTML = `${datePart} <span style="color: #9ca3af; margin: 0 10px;">|</span> <span style="color: #111827; font-weight: 600;">${timePart}</span>`;
+        // Saat rengi yüksek kontrast yapıldı
+        clockEl.innerHTML = `<span style="color: #475569;">${datePart}</span> <span style="color: #cbd5e1; margin: 0 10px;">|</span> <span style="color: #0f172a; font-weight: 800;">${timePart}</span>`;
     }
 }
 
@@ -45,7 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// ULTRA-SADE GOLDPRICE.ORG TABLO MOTORU
 function renderGoldPriceTable(item) {
     const container = document.getElementById('perf-stats');
     if (!container) return;
@@ -86,7 +86,6 @@ function renderGoldPriceTable(item) {
         const colorClass = isPos ? 'gp-pos' : 'gp-neg';
         const sign = isPos ? '+' : '';
 
-        // Sadece düz yazı ve tablo
         tbodyHtml += `
             <tr>
                 <td class="left">${p.label}</td>
@@ -96,7 +95,7 @@ function renderGoldPriceTable(item) {
         `;
     });
 
-    const title = `${item.name.toUpperCase()} Price Performance USD`;
+    const title = `${item.name.toUpperCase()} PRICE PERFORMANCE USD`;
 
     container.innerHTML = `
         <div class="gp-title">${title}</div>
@@ -182,7 +181,6 @@ function loadCustomApexChart(item) {
     const camelName = item.name.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     document.getElementById('chart-title').textContent = `${camelName} Price`;
 
-    // SADE TABLOYU OLUŞTUR
     renderGoldPriceTable(item);
 
     let filteredData = [];
@@ -202,7 +200,7 @@ function loadCustomApexChart(item) {
     const options = {
         series: [{ name: 'Price', data: filteredData }],
         chart: {
-            type: 'area', // Şeffaf gölgeli alan
+            type: 'area',
             height: '100%',
             width: '100%',
             background: 'transparent', 
@@ -210,34 +208,26 @@ function loadCustomApexChart(item) {
             toolbar: { show: false }, 
             animations: { enabled: true, easing: 'easeinout', speed: 200 } 
         },
-        colors: ['#3b82f6'], 
-        stroke: { curve: 'smooth', width: 2 }, // Yumuşak çizgiler
+        colors: ['#2563eb'], // Daha koyu, daha okunabilir mavi 
+        stroke: { curve: 'smooth', width: 3 }, // Çizgi kalınlaştırıldı
         
         fill: {
             type: 'gradient',
-            gradient: {
-                shadeIntensity: 1,
-                opacityFrom: 0.15, 
-                opacityTo: 0.0,  
-                stops: [0, 90, 100]
-            }
+            gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.0, stops: [0, 90, 100] }
         },
-
-        markers: { size: 0, hover: { size: 5 } }, 
+        markers: { size: 0, hover: { size: 6 } }, 
         dataLabels: { enabled: false }, 
-
         tooltip: {
             theme: 'light',
             x: { format: days === 1 ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }, 
             y: { formatter: (value) => `$${value.toFixed(2)}` },
-            style: { fontSize: '13px', fontFamily: 'Inter' }
+            style: { fontSize: '14px', fontFamily: 'Inter' }
         },
-
         xaxis: {
             type: 'datetime',
             tickAmount: days >= 365 ? 5 : 6,
             labels: { 
-                style: { colors: '#6b7280', fontSize: '12px', fontFamily: 'Inter', fontWeight: 500 },
+                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 700 }, // EKSEN YAZILARI KÖMÜR KARASI OLDU
                 datetimeUTC: false,
                 formatter: function(val) {
                     if (!val) return '';
@@ -247,23 +237,21 @@ function loadCustomApexChart(item) {
                     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 }
             },
-            axisBorder: { show: false }, 
-            axisTicks: { show: false }
+            axisBorder: { show: true, color: '#e2e8f0' }, 
+            axisTicks: { show: true, color: '#e2e8f0' }
         },
-
         yaxis: {
             opposite: false, 
             min: minPrice - (minPrice * 0.002),
             max: maxPrice + (maxPrice * 0.002),
             labels: {
-                style: { colors: '#6b7280', fontSize: '12px', fontFamily: 'Inter', fontWeight: 600 },
+                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 700 }, // Y EKSENİ OKUNABİLİR
                 formatter: (value) => `$${value.toFixed(2)}`
             }
         },
-
         grid: {
-            show: true, borderColor: '#f3f4f6', strokeDashArray: 0, 
-            xaxis: { lines: { show: false } }, yaxis: { lines: { show: true } }, 
+            show: true, borderColor: '#e2e8f0', strokeDashArray: 4, 
+            xaxis: { lines: { show: true } }, yaxis: { lines: { show: true } }, 
             padding: { top: 10, right: 20, bottom: 20, left: 10 }
         }
     };
@@ -292,9 +280,10 @@ async function fetchMarketData(isFirstLoad = false) {
             const isPos = parseFloat(item.changePercent) >= 0;
             const sign = isPos ? '+' : '';
 
+            // YENİ ICON-BOX TASARIMI
             card.innerHTML = `
                 <div class="card-info">
-                    <i class="commodity-icon">${getEmojiIcon(item.name)}</i>
+                    <div class="icon-box">${getEmojiIcon(item.name)}</div>
                     <div class="commodity-details">
                         <h2>${item.name}</h2>
                         <div class="price">$${item.price}</div>
