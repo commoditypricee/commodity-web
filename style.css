@@ -1,16 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* --- SIFIRLAMA VE TEMEL AYARLAR --- */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    /* BEYAZ EKRAN */
-    background-color: #f8fafc; /* Hafif kırık beyaz, göz yormaz */
-    color: #111827; /* Koyu metin */
+    background-color: #f8fafc; 
+    color: #111827; 
     font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -24,7 +18,6 @@ body {
     width: 100%;
 }
 
-/* --- ÜST MENÜ VE LOGO --- */
 .top-nav {
     display: flex;
     justify-content: space-between;
@@ -34,164 +27,121 @@ body {
     padding-bottom: 20px;
 }
 
-.logo { 
-    font-size: 24px; 
-    font-weight: 700; 
-    letter-spacing: -0.5px; 
-    color: #111827;
-}
+.logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: #111827; }
+.logo span { color: #3b82f6; }
 
-.logo span { 
-    color: #3b82f6; 
-}
-
-/* Saat Alanı (Büyütüldü ve Sadeleştirildi) */
 .clock-pill {
-    font-size: 16px; 
-    color: #4b5563;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    letter-spacing: 0.5px;
+    font-size: 16px; color: #4b5563; font-weight: 500; display: flex; align-items: center;
 }
 
-/* --- ANA IZGARA (Kaymayı Önleyen Kesin Çözüm) --- */
 .bento-grid {
     display: grid;
-    /* minmax(0, ...) komutu grafiğin kartları aşağı itmesini KESİN olarak engeller */
     grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); 
-    gap: 24px;
-    align-items: start;
-    width: 100%;
+    gap: 24px; align-items: start; width: 100%;
 }
 
-/* --- SOL: GRAFİK ALANI --- */
 .main-chart-wrapper {
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     padding: 24px;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+    display: flex; flex-direction: column; width: 100%;
 }
 
 .chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
 }
 
 #chart-title {
-    font-size: 18px;
-    color: #111827;
-    font-weight: 600;
-    /* app.js başlığı CamelCase yapıyor, css ile kontrol etmiyoruz */
+    font-size: 18px; color: #111827; font-weight: 600;
 }
 
-/* Borsa Standardı Filtre Butonları */
-.time-filters {
-    display: flex;
-    gap: 4px;
-}
-
+.time-filters { display: flex; gap: 4px; }
 .time-btn {
-    background: transparent;
-    border: 1px solid transparent;
-    color: #6b7280;
-    padding: 6px 14px;
-    border-radius: 4px;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    background: transparent; border: 1px solid transparent; color: #6b7280;
+    padding: 6px 14px; border-radius: 4px; font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
 }
-
 .time-btn:hover { color: #111827; }
 .time-btn.active {
-    background: #f1f5f9; 
-    color: #111827;
-    border-color: #e2e8f0;
+    background: #f1f5f9; color: #111827; border-color: #e2e8f0;
 }
 
-.main-chart {
-    height: 450px;
-    width: 100%;
-}
+.main-chart { height: 420px; width: 100%; }
 
-/* --- SAĞ: EMTİA KARTLARI (Yepyeni Terminal Tasarımı) --- */
-.cards-wrapper {
-    display: flex;
-    flex-direction: column;
+/* YENİ: PERFORMANS TABLOSU (Getiriler) */
+.performance-stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
     gap: 12px;
-    width: 100%;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed #e2e8f0;
 }
 
-.card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 16px 20px;
-    display: flex;
-    justify-content: space-between; 
-    align-items: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.card:hover {
-    border-color: #cbd5e1;
+.stat-box {
     background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 12px;
+    text-align: center;
 }
 
-.card-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-/* Emtia Simgeleri */
-.card-info i {
-    font-size: 20px;
-    width: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.card-info .commodity-details h2 {
-    margin: 0;
-    font-size: 13px;
+.stat-label {
+    font-size: 12px;
     color: #6b7280;
     font-weight: 600;
+    margin-bottom: 6px;
     text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
-.card-info .commodity-details .price {
-    font-size: 24px;
-    color: #111827;
-    font-weight: 600;
+.stat-value {
+    font-size: 15px;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
 
-/* Yüzde Rozetleri */
-.badge {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 600;
+/* KARTLAR */
+.cards-wrapper {
+    display: flex; flex-direction: column; gap: 12px; width: 100%;
 }
 
+.card {
+    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: 16px 20px; display: flex; justify-content: space-between; 
+    align-items: center; cursor: pointer; transition: all 0.2s ease;
+}
+.card:hover { border-color: #cbd5e1; background: #f8fafc; }
+
+.card-info { display: flex; align-items: center; gap: 12px; }
+
+/* Emoji Ayarları */
+.commodity-icon {
+    font-size: 26px; /* Simgeleri büyüttük */
+    font-style: normal; /* Eğik durmasını engeller */
+    line-height: 1;
+}
+
+.card-info .commodity-details h2 {
+    margin: 0 0 2px 0; font-size: 13px; color: #6b7280; font-weight: 600; text-transform: uppercase;
+}
+.card-info .commodity-details .price {
+    font-size: 22px; color: #111827; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+
+.badge {
+    padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: 600;
+}
 .positive { background: rgba(16, 185, 129, 0.1); color: #10b981; }
 .negative { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
-/* Mobil Uyumluluk */
 @media (max-width: 1024px) {
     .bento-grid { grid-template-columns: 1fr; }
     .chart-header { flex-direction: column; gap: 15px; align-items: flex-start; }
     .time-filters { width: 100%; overflow-x: auto; }
     .main-chart { height: 350px; }
+    .performance-stats { grid-template-columns: repeat(3, 1fr); } /* Mobilde 3'lü sütun */
+}
+@media (max-width: 600px) {
+    .performance-stats { grid-template-columns: repeat(2, 1fr); }
 }
