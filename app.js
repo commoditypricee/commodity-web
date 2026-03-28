@@ -1,10 +1,19 @@
+// EMTİA SİMGELERİ (Düzeltme 1)
+const icons = {
+    'GOLD': 'image_1.png', 
+    'SILVER': 'image_3.png', 
+    'CRUDE OIL': 'image_5.png', 
+    'COPPER': 'image_7.png',
+    // data.json'daki tam ada göre burayı güncelleyebilirsin, bunlar profesyonel simgeler.
+};
+
 function updateClock() {
     const now = new Date();
     const clockEl = document.getElementById('clock');
     if(clockEl) {
         const datePart = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         const timePart = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-        clockEl.innerHTML = `${datePart} <span style="color: #3f3f46; margin: 0 10px;">|</span> <span style="color: #fafafa; font-weight: 600;">${timePart}</span>`;
+        clockEl.innerHTML = `${datePart} <span style="color: #cbd5e1; margin: 0 10px;">|</span> <span style="color: #4b5563; font-weight: 600;">${timePart}</span>`;
     }
 }
 
@@ -73,6 +82,14 @@ function updateCardPercentages(days) {
     });
 }
 
+// BAŞLIK FORMATI DÜZELTME (Düzeltme 2 & 3: CamelCase, Parantez Yok)
+function getPriceTitle(name, isFirstLoad = false) {
+    const camelName = name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    // İlk harfler büyük, PRICE ibaresi eklendi, parantezli timeframe kaldırıldı.
+    // Eğer data.json'da 'CRUDE OIL' varsa 'Crude Oil Price' olacak.
+    return `${camelName} Price`; 
+}
+
 function applyTimeFilter(days, timeframeText) {
     if (!mainApexChart) return;
 
@@ -126,7 +143,8 @@ function applyTimeFilter(days, timeframeText) {
         }
     });
 
-    document.getElementById('chart-title').textContent = `${currentSymbolName.toUpperCase()} PRICE (${timeframeText})`;
+    // Başlık Formatı Uygulandı
+    document.getElementById('chart-title').textContent = getPriceTitle(currentSymbolName);
 }
 
 function loadCustomApexChart(item) {
@@ -137,15 +155,14 @@ function loadCustomApexChart(item) {
     
     const activeBtn = document.querySelector('.time-btn.active');
     const days = activeBtn ? parseInt(activeBtn.getAttribute('data-days')) : 1;
-    const btnText = activeBtn ? activeBtn.textContent : '1 Day';
-    const isIntraday = (days === 1);
     const isLongTerm = (days >= 365);
 
-    document.getElementById('chart-title').textContent = `${item.name.toUpperCase()} PRICE (${btnText})`;
+    // Başlık Formatı İlk Yüklemede Uygulandı
+    document.getElementById('chart-title').textContent = getPriceTitle(item.name);
 
     let filteredData = [];
 
-    if (isIntraday) {
+    if (days === 1) {
         if (currentItemIntraday && currentItemIntraday.length > 0) {
             filteredData = currentItemIntraday;
         } else {
@@ -170,23 +187,33 @@ function loadCustomApexChart(item) {
     const options = {
         series: [{ name: 'Price', data: filteredData }],
         chart: {
-            type: 'line', 
+            type: 'area', // Beyaz temada Area (Gölge) klas durur
             height: '100%',
             width: '100%',
             background: 'transparent', 
             fontFamily: 'Inter, sans-serif',
             toolbar: { show: false }, 
-            animations: { enabled: true, easing: 'easeinout', speed: 200 } 
+            animations: { enabled: true, easing: 'easeinout', speed: 300 } 
         },
         colors: ['#3b82f6'], 
-        stroke: { curve: 'straight', width: 2 }, 
+        stroke: { curve: 'smooth', width: 2 }, // Yumuşak çizgi modern gösterir
         
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.2, 
+                opacityTo: 0.0,  
+                stops: [0, 90, 100]
+            }
+        },
+
         markers: { size: 0, hover: { size: 4 } }, 
         dataLabels: { enabled: false }, 
 
         tooltip: {
-            theme: 'dark',
-            x: { format: isIntraday ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }, 
+            theme: 'dark', // Tooltip dark kalsın, okunabilirliği daha iyi
+            x: { format: days === 1 ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }, 
             y: { formatter: (value) => `$${value.toFixed(2)}` },
             style: { fontSize: '13px', fontFamily: 'Inter' }
         },
@@ -200,7 +227,7 @@ function loadCustomApexChart(item) {
                 formatter: function(val) {
                     if (!val) return '';
                     const date = new Date(val);
-                    if (isIntraday) {
+                    if (days === 1) {
                         return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
                     }
                     if (isLongTerm) {
@@ -226,16 +253,36 @@ function loadCustomApexChart(item) {
 
         grid: {
             show: true,
-            borderColor: '#27272a',
-            strokeDashArray: 3, 
+            borderColor: '#e2e8f0', // Beyaz temaya uygun grid çizgileri
+            strokeDashArray: 4, 
             xaxis: { lines: { show: true } }, 
             yaxis: { lines: { show: true } }, 
-            padding: { top: 10, right: 20, bottom: 40, left: 10 }
+            padding: { top: 10, right: 20, bottom: 20, left: 10 }
         }
     };
 
     mainApexChart = new ApexCharts(container, options);
     mainApexChart.render();
+}
+
+// Kartlara simgeleri basan fonksiyon
+function getCardHtml(item) {
+    const iconPath = icons[item.name] || 'default-commodity.png'; // data.json'da 'CRUDE OIL' varsa, blackbarrel.png'yi bulur.
+    const isPositive = parseFloat(item.changePercent) >= 0;
+    const colorClass = isPositive ? 'positive' : 'negative';
+    const sign = isPositive ? '+' : '';
+
+    return `
+        <div class="card-info">
+            <i class="commodity-icon"><img src="${iconPath}" alt="${item.name}" style="width:24px; height:24px;"></i> <div class="commodity-details">
+                <h2>${item.name}</h2>
+                <div class="price">$${item.price}</div>
+            </div>
+        </div>
+        <div class="card-status">
+            <div class="badge ${colorClass}">${sign}${item.changePercent}%</div>
+        </div>
+    `;
 }
 
 async function fetchMarketData(isFirstLoad = false) {
@@ -258,19 +305,7 @@ async function fetchMarketData(isFirstLoad = false) {
                 setTimeout(() => loadCustomApexChart(item), 100);
             }
 
-            const isPositive = parseFloat(item.changePercent) >= 0;
-            const colorClass = isPositive ? 'positive' : 'negative';
-            const sign = isPositive ? '+' : '';
-
-            card.innerHTML = `
-                <div class="card-info">
-                    <h2>${item.name}</h2>
-                    <div class="price">$${item.price}</div>
-                </div>
-                <div class="card-status">
-                    <div class="badge ${colorClass}">${sign}${item.changePercent}%</div>
-                </div>
-            `;
+            card.innerHTML = getCardHtml(item); // Simgeli kart HTML'i basıldı
             
             card.addEventListener('click', () => {
                 loadCustomApexChart(item); 
