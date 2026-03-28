@@ -1,67 +1,74 @@
 const fs = require('fs');
-// Kütüphaneyi çağırmanın en sağlam ve klasik yolu
-const yahooFinance = require('yahoo-finance2').default; 
 
 async function updateData() {
-    try {
-        const symbols = ['GC=F', 'SI=F', 'HG=F', 'BZ=F', 'NG=F'];
-        const customNames = {
-            'GC=F': 'Gold', 'SI=F': 'Silver', 'HG=F': 'Copper',
-            'BZ=F': 'Brent Oil', 'NG=F': 'Natural Gas'
-        };
+    const symbols = ['GC=F', 'SI=F', 'HG=F', 'BZ=F', 'NG=F'];
+    const customNames = {
+        'GC=F': 'Gold', 'SI=F': 'Silver', 'HG=F': 'Copper',
+        'BZ=F': 'Brent Oil', 'NG=F': 'Natural Gas'
+    };
 
-        const today = new Date();
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(today.getDate() - 30);
-        const period1 = thirtyDaysAgo.toISOString().split('T')[0];
+    const finalData = [];
 
-        console.log(`Veriler şu tarihten itibaren çekiliyor: ${period1}`);
+    // Kütüphane yok! Doğrudan Yahoo'nun API'sine bağlanıyoruz.
+    for (const sym of symbols) {
+        console.log(`\n---> ${sym} için veri çekiliyor...`);
+        try {
+            // Yahoo'dan 1 aylık günlük grafik verisini doğrudan istiyoruz
+            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`;
+            
+            // Tarayıcı taklidi yaparak Yahoo'yu kandırıyoruz
+            const response = await fetch(url, {
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+            });
 
-        const finalData = [];
+            if (!response.ok) throw new Error(`HTTP Hatası: ${response.status}`);
+            
+            const rawData = await response.json();
+            const result = rawData.chart.result[0];
+            
+            // Verileri ayıklıyoruz
+            const meta = result.meta;
+            const timestamps = result.timestamp;
+            const closes = result.indicators.quote[0].close;
 
-        // Her emtia için tek tek, sırayla ve güvenli bir şekilde işlem yapıyoruz
-        for (const sym of symbols) {
-            try {
-                console.log(`\n---> ${sym} için veri çekiliyor...`);
-                
-                // 1. Anlık fiyatı çek
-                const quoteData = await yahooFinance.quote(sym);
-                console.log(`[BAŞARILI] ${sym} anlık fiyat alındı: $${quoteData.regularMarketPrice}`);
-
-                // 2. Geçmiş 30 günün verisini çek
-                const historyData = await yahooFinance.historical(sym, { period1: period1 });
-                console.log(`[BAŞARILI] ${sym} geçmiş veri alındı: ${historyData.length} günlük veri`);
-
-                const history = historyData.map(h => ({
-                    x: h.date.getTime(),
-                    y: parseFloat(h.close.toFixed(2))
-                }));
-
-                finalData.push({
-                    symbol: sym,
-                    name: customNames[sym] || sym,
-                    price: quoteData.regularMarketPrice.toFixed(2),
-                    changePercent: quoteData.regularMarketChangePercent.toFixed(2),
-                    history: history
-                });
-
-            } catch (err) {
-                console.error(`[HATA] ${sym} için veri çekilemedi:`, err.message);
-                // Biri hata verse bile diğerleri çalışmaya devam etsin
+            // Grafiğin anlayacağı geçmiş 30 günlük veriyi inşa ediyoruz
+            const history = [];
+            for (let i = 0; i < timestamps.length; i++) {
+                if (closes[i] !== null && closes[i] !== undefined) {
+                    history.push({
+                        x: timestamps[i] * 1000, // Milisaniyeye çeviriyoruz
+                        y: parseFloat(closes[i].toFixed(2))
+                    });
+                }
             }
-        }
 
-        if (finalData.length === 0) {
-            console.error("KRİTİK HATA: Hiçbir veri çekilemedi! finalData bomboş.");
-            process.exit(1); // Görevi kırmızı çarpı ile bitir ki bilelim
-        }
+            // Anlık fiyat ve yüzdelik değişimi hesaplıyoruz
+            const currentPrice = meta.regularMarketPrice;
+            const previousClose = meta.chartPreviousClose;
+            const changePercent = ((currentPrice - previousClose) / previousClose) * 100;
 
+            finalData.push({
+                symbol: sym,
+                name: customNames[sym] || sym,
+                price: currentPrice.toFixed(2),
+                changePercent: changePercent.toFixed(2),
+                history: history
+            });
+            
+            console.log(`[BAŞARILI] ${sym} - Fiyat: $${currentPrice}`);
+
+        } catch (error) {
+            console.error(`[HATA] ${sym} çekilemedi:`, error.message);
+        }
+    }
+
+    // Eğer en az 1 tane bile veri çekebildiysek dosyayı kaydet
+    if (finalData.length > 0) {
         fs.writeFileSync('data.json', JSON.stringify(finalData, null, 2));
-        console.log("\nZAFER! data.json dosyası dolu ve hazır.");
-        
-    } catch (error) {
-        console.error("Sistem çöktü:", error);
-        process.exit(1); 
+        console.log("\nZAFER! Veriler doğrudan Yahoo'nun kalbinden sökülüp alındı ve data.json dolduruldu.");
+    } else {
+        console.error("\nKRİTİK HATA: Hiçbir veri çekilemedi. Sistem durduruluyor.");
+        process.exit(1);
     }
 }
 
