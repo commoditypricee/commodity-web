@@ -1,4 +1,3 @@
-// DİNAMİK EMOJİLER (Garantili Çözüm)
 const getEmojiIcon = (name) => {
     const n = name.toUpperCase();
     if (n.includes('GOLD')) return '🥇';
@@ -18,8 +17,7 @@ function updateClock() {
     if(clockEl) {
         const datePart = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         const timePart = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-        // BEYAZ TEMA İÇİN SAAT RENKLERİ DÜZELTİLDİ
-        clockEl.innerHTML = `${datePart} <span style="color: #cbd5e1; margin: 0 10px;">|</span> <span style="color: #111827; font-weight: 600;">${timePart}</span>`;
+        clockEl.innerHTML = `${datePart} <span style="color: #9ca3af; margin: 0 10px;">|</span> <span style="color: #111827; font-weight: 600;">${timePart}</span>`;
     }
 }
 
@@ -47,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// GOLDPRICE.ORG STİLİ BİREBİR TABLO OLUŞTURUCU
+// ULTRA-SADE GOLDPRICE.ORG TABLO MOTORU
 function renderGoldPriceTable(item) {
     const container = document.getElementById('perf-stats');
     if (!container) return;
@@ -85,19 +83,36 @@ function renderGoldPriceTable(item) {
         }
 
         const isPos = changePercent >= 0;
-        const colorClass = isPos ? 'gp-positive' : 'gp-negative';
+        const colorClass = isPos ? 'gp-pos' : 'gp-neg';
         const sign = isPos ? '+' : '';
 
-        // GoldPrice.org stili dikey tablo HTML'i
+        // Sadece düz yazı ve tablo
         tbodyHtml += `
-            <div class="stat-box">
-                <div class="stat-label">${item.name} PRICE PERFORMANCE (${p.label})</div>
-                <div class="stat-value" style="color: ${isPos ? '#10b981' : '#ef4444'}">${sign}${changeAmount.toFixed(2)} (${sign}${changePercent.toFixed(2)}%)</div>
-            </div>
+            <tr>
+                <td class="left">${p.label}</td>
+                <td class="right ${colorClass}">${sign}${changeAmount.toFixed(2)}</td>
+                <td class="right ${colorClass}">${sign}${changePercent.toFixed(2)}%</td>
+            </tr>
         `;
     });
 
-    container.innerHTML = tbodyHtml;
+    const title = `${item.name.toUpperCase()} Price Performance USD`;
+
+    container.innerHTML = `
+        <div class="gp-title">${title}</div>
+        <table class="gp-simple-table">
+            <thead>
+                <tr>
+                    <th class="left">Change</th>
+                    <th class="right">Amount</th>
+                    <th class="right">%</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${tbodyHtml}
+            </tbody>
+        </table>
+    `;
 }
 
 function updateCardPercentages(days) {
@@ -136,7 +151,6 @@ function applyTimeFilter(days) {
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
 
-    // KLASİK DÜZ ÇİZGİ YERİNE MODERN GÖLGE DESTEKLİ AREA (VİZYON 1)
     mainApexChart.updateSeries([{ name: 'Price', data: filteredData }]);
     
     mainApexChart.updateOptions({
@@ -168,7 +182,7 @@ function loadCustomApexChart(item) {
     const camelName = item.name.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     document.getElementById('chart-title').textContent = `${camelName} Price`;
 
-    // TABLOYU OTOMATİK OLUŞTUR
+    // SADE TABLOYU OLUŞTUR
     renderGoldPriceTable(item);
 
     let filteredData = [];
@@ -185,11 +199,10 @@ function loadCustomApexChart(item) {
 
     if (mainApexChart) { mainApexChart.destroy(); }
 
-    // MODERN YENİ NESİL GRAFİK (APPLE STOCKS STİLİ)
     const options = {
         series: [{ name: 'Price', data: filteredData }],
         chart: {
-            type: 'area', // Gölge destekli modern akış
+            type: 'area', // Şeffaf gölgeli alan
             height: '100%',
             width: '100%',
             background: 'transparent', 
@@ -198,19 +211,19 @@ function loadCustomApexChart(item) {
             animations: { enabled: true, easing: 'easeinout', speed: 200 } 
         },
         colors: ['#3b82f6'], 
-        stroke: { curve: 'smooth', width: 2 }, // Pürüzsüz kıvrımlar
+        stroke: { curve: 'smooth', width: 2 }, // Yumuşak çizgiler
         
         fill: {
             type: 'gradient',
             gradient: {
                 shadeIntensity: 1,
-                opacityFrom: 0.2, 
+                opacityFrom: 0.15, 
                 opacityTo: 0.0,  
                 stops: [0, 90, 100]
             }
         },
 
-        markers: { size: 0, hover: { size: 6 } }, 
+        markers: { size: 0, hover: { size: 5 } }, 
         dataLabels: { enabled: false }, 
 
         tooltip: {
@@ -224,7 +237,7 @@ function loadCustomApexChart(item) {
             type: 'datetime',
             tickAmount: days >= 365 ? 5 : 6,
             labels: { 
-                style: { colors: '#71717a', fontSize: '12px', fontFamily: 'Inter' },
+                style: { colors: '#6b7280', fontSize: '12px', fontFamily: 'Inter', fontWeight: 500 },
                 datetimeUTC: false,
                 formatter: function(val) {
                     if (!val) return '';
@@ -243,14 +256,14 @@ function loadCustomApexChart(item) {
             min: minPrice - (minPrice * 0.002),
             max: maxPrice + (maxPrice * 0.002),
             labels: {
-                style: { colors: '#71717a', fontSize: '12px', fontFamily: 'Inter' },
+                style: { colors: '#6b7280', fontSize: '12px', fontFamily: 'Inter', fontWeight: 600 },
                 formatter: (value) => `$${value.toFixed(2)}`
             }
         },
 
         grid: {
-            show: true, borderColor: '#e2e8f0', strokeDashArray: 4, 
-            xaxis: { lines: { show: true } }, yaxis: { lines: { show: true } }, 
+            show: true, borderColor: '#f3f4f6', strokeDashArray: 0, 
+            xaxis: { lines: { show: false } }, yaxis: { lines: { show: true } }, 
             padding: { top: 10, right: 20, bottom: 20, left: 10 }
         }
     };
