@@ -1,4 +1,32 @@
 const fs = require('fs');
+const https = require('https'); // İŞTE BU! Node.js'in asla çökmeyen kendi modülü.
+
+// Kendi yenilmez veri çekme motorumuzu yazıyoruz
+function getYahooData(symbol) {
+    return new Promise((resolve, reject) => {
+        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1mo`;
+        
+        https.get(url, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+        }, (res) => {
+            let data = '';
+            // Veriler parça parça gelir, onları birleştiriyoruz
+            res.on('data', chunk => data += chunk);
+            // Veri akışı bittiğinde:
+            res.on('end', () => {
+                try {
+                    if (res.statusCode !== 200) {
+                        reject(new Error(`HTTP Hatası: ${res.statusCode}`));
+                        return;
+                    }
+                    resolve(JSON.parse(data));
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        }).on('error', (e) => reject(e));
+    });
+}
 
 async function updateData() {
     const symbols = ['GC=F', 'SI=F', 'HG=F', 'BZ=F', 'NG=F'];
@@ -9,40 +37,27 @@ async function updateData() {
 
     const finalData = [];
 
-    // Kütüphane yok! Doğrudan Yahoo'nun API'sine bağlanıyoruz.
     for (const sym of symbols) {
         console.log(`\n---> ${sym} için veri çekiliyor...`);
         try {
-            // Yahoo'dan 1 aylık günlük grafik verisini doğrudan istiyoruz
-            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1mo`;
-            
-            // Tarayıcı taklidi yaparak Yahoo'yu kandırıyoruz
-            const response = await fetch(url, {
-                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
-            });
-
-            if (!response.ok) throw new Error(`HTTP Hatası: ${response.status}`);
-            
-            const rawData = await response.json();
+            // Sağlam motorumuzu çalıştırıyoruz
+            const rawData = await getYahooData(sym);
             const result = rawData.chart.result[0];
             
-            // Verileri ayıklıyoruz
             const meta = result.meta;
             const timestamps = result.timestamp;
             const closes = result.indicators.quote[0].close;
 
-            // Grafiğin anlayacağı geçmiş 30 günlük veriyi inşa ediyoruz
             const history = [];
             for (let i = 0; i < timestamps.length; i++) {
                 if (closes[i] !== null && closes[i] !== undefined) {
                     history.push({
-                        x: timestamps[i] * 1000, // Milisaniyeye çeviriyoruz
+                        x: timestamps[i] * 1000, 
                         y: parseFloat(closes[i].toFixed(2))
                     });
                 }
             }
 
-            // Anlık fiyat ve yüzdelik değişimi hesaplıyoruz
             const currentPrice = meta.regularMarketPrice;
             const previousClose = meta.chartPreviousClose;
             const changePercent = ((currentPrice - previousClose) / previousClose) * 100;
@@ -62,12 +77,11 @@ async function updateData() {
         }
     }
 
-    // Eğer en az 1 tane bile veri çekebildiysek dosyayı kaydet
     if (finalData.length > 0) {
         fs.writeFileSync('data.json', JSON.stringify(finalData, null, 2));
-        console.log("\nZAFER! Veriler doğrudan Yahoo'nun kalbinden sökülüp alındı ve data.json dolduruldu.");
+        console.log("\nZAFER! Veriler data.json dosyasına başarıyla yazıldı.");
     } else {
-        console.error("\nKRİTİK HATA: Hiçbir veri çekilemedi. Sistem durduruluyor.");
+        console.error("\nKRİTİK HATA: Hiçbir veri çekilemedi.");
         process.exit(1);
     }
 }
