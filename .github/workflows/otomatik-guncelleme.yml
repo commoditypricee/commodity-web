@@ -1,0 +1,32 @@
+name: Canli Veri Guncelleyici
+
+on:
+  schedule:
+    - cron: '*/5 * * * *' # Her 15 dakikada bir otomatik çalışır
+  workflow_dispatch: # İstersen butona basıp manuel de çalıştırabilirsin
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # data.json dosyasını kaydedebilmesi için yazma izni
+
+    steps:
+      - name: Dosyalari Cek
+        uses: actions/checkout@v3
+
+      - name: Node.js Kurulumu
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Guncel Fiyatlari Cek (update.js calisiyor)
+        run: node update.js
+
+      - name: Yeni Veriyi Siteye Kaydet
+        run: |
+          git config --global user.name "Emita Bot"
+          git config --global user.email "bot@emita.com"
+          git add data.json
+          git commit -m "Anlik fiyatlar guncellendi" || exit 0
+          git push
