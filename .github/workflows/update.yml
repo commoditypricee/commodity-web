@@ -2,7 +2,7 @@ name: Piyasa Verilerini Guncelle
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Her 15 dakikada bir çalışır
+    - cron: '*/5 * * * *'  # Her 5 dakikada bir otomatik çalışır
   workflow_dispatch:
 
 jobs:
@@ -33,5 +33,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "🔄 Piyasa verileri güncellendi" || echo "Değişiklik yok"
+          git commit -m "🔄 Piyasa verileri güncellendi [skip ci]" || echo "Değişiklik yok"
           git push
