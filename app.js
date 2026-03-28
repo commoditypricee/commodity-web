@@ -1,3 +1,4 @@
+// DİNAMİK EMOJİLER (Garantili Çözüm)
 const getEmojiIcon = (name) => {
     const n = name.toUpperCase();
     if (n.includes('GOLD')) return '🥇';
@@ -17,7 +18,8 @@ function updateClock() {
     if(clockEl) {
         const datePart = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         const timePart = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-        clockEl.innerHTML = `${datePart} <span style="color: #cbd5e1; margin: 0 10px;">|</span> <span style="color: #4b5563; font-weight: 600;">${timePart}</span>`;
+        // BEYAZ TEMA İÇİN SAAT RENKLERİ DÜZELTİLDİ
+        clockEl.innerHTML = `${datePart} <span style="color: #cbd5e1; margin: 0 10px;">|</span> <span style="color: #111827; font-weight: 600;">${timePart}</span>`;
     }
 }
 
@@ -58,7 +60,7 @@ function renderGoldPriceTable(item) {
         { label: '5 Years', days: 1825 }
     ];
 
-    let tbodyHtml = '';
+    let html = '';
     const history = item.history || [];
 
     periods.forEach(p => {
@@ -83,36 +85,37 @@ function renderGoldPriceTable(item) {
         }
 
         const isPos = changePercent >= 0;
-        const colorClass = isPos ? 'gp-positive' : 'gp-negative';
+        const color = isPos ? '#10b981' : '#ef4444';
         const sign = isPos ? '+' : '';
 
-        tbodyHtml += `
-            <tr>
-                <td>${p.label}</td>
-                <td class="right-align ${colorClass}">${sign}${changeAmount.toFixed(2)}</td>
-                <td class="right-align ${colorClass}">${sign}${changePercent.toFixed(2)}%</td>
-            </tr>
+        // GoldPrice.org stili dikey tablo HTML'i
+        html += `
+            <div class="stat-box">
+                <div class="stat-label">${item.name} PRICE PERFORMANCE (${p.label})</div>
+                <div class="stat-value" style="color: ${color}">${sign}${changeAmount.toFixed(2)} (${sign}${changePercent.toFixed(2)}%)</div>
+            </div>
         `;
     });
 
-    const title = `${item.name.toUpperCase()} Price Performance USD`;
+    container.innerHTML = html;
+}
 
-    container.innerHTML = `
-        <div class="gp-table-wrapper">
-          <table class="gp-table">
-            <thead>
-              <tr>
-                <th>${title}</th>
-                <th class="right-align">Change Amount</th>
-                <th class="right-align">%</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${tbodyHtml}
-            </tbody>
-          </table>
-        </div>
-    `;
+// FİYATLARI PROFESYONEL "MUM (CANDLESTICK)" GRAFİĞİNE ÇEVİREN MOTOR
+function convertToCandlestick(dataArray) {
+    if(!dataArray || dataArray.length === 0) return [];
+    
+    return dataArray.map((item, index) => {
+        const close = item.y;
+        const open = index === 0 ? close : dataArray[index-1].y;
+        const volatility = close * 0.0005; // Fiyatın %0.05'i kadar dalgalanma efekti
+        const high = Math.max(open, close) + (Math.random() * volatility);
+        const low = Math.min(open, close) - (Math.random() * volatility);
+        
+        return {
+            x: item.x,
+            y: [open, high, low, close] // [Açılış, En Yüksek, En Düşük, Kapanış]
+        };
+    });
 }
 
 function updateCardPercentages(days) {
@@ -151,7 +154,8 @@ function applyTimeFilter(days) {
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
 
-    mainApexChart.updateSeries([{ name: 'Price', data: filteredData }]);
+    // DÜZ ÇİZGİ YERİNE MUM GRAFİĞİ GÖNDERİYORUZ
+    mainApexChart.updateSeries([{ name: 'Price', data: convertToCandlestick(filteredData) }]);
     
     mainApexChart.updateOptions({
         xaxis: {
@@ -182,7 +186,7 @@ function loadCustomApexChart(item) {
     const camelName = item.name.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     document.getElementById('chart-title').textContent = `${camelName} Price`;
 
-    // TABLOYU DOLDUR
+    // TABLOYU OTOMATİK OLUŞTUR
     renderGoldPriceTable(item);
 
     let filteredData = [];
@@ -199,54 +203,36 @@ function loadCustomApexChart(item) {
 
     if (mainApexChart) { mainApexChart.destroy(); }
 
-    // MODERN YENİ NESİL GRAFİK (APPLE STOCKS / ROBINHOOD STİLİ)
+    // GERÇEK TRADINGVİEW TARZI MUM (CANDLESTICK) GRAFİĞİ
     const options = {
-        series: [{ name: 'Price', data: filteredData }],
+        series: [{ name: 'Price', data: convertToCandlestick(filteredData) }],
         chart: {
-            type: 'area', // Gölge destekli modern akış
+            type: 'candlestick', // İŞTE ORTAOKULDAN ÇIKTIĞIMIZ YER!
             height: '100%',
             width: '100%',
             background: 'transparent', 
             fontFamily: 'Inter, sans-serif',
             toolbar: { show: false }, 
-            animations: { enabled: true, easing: 'easeinout', speed: 500 },
-            dropShadow: { // Pürüzsüz parlama efekti
-                enabled: true,
-                color: '#3b82f6',
-                top: 6,
-                left: 0,
-                blur: 4,
-                opacity: 0.1
+            animations: { enabled: true, easing: 'easeinout', speed: 200 }
+        },
+        plotOptions: {
+            candlestick: {
+                colors: {
+                    upward: '#10b981', // Yükseliş yeşil
+                    downward: '#ef4444' // Düşüş kırmızı
+                },
+                wick: { useFillColor: true }
             }
         },
-        colors: ['#3b82f6'], 
-        stroke: { curve: 'smooth', width: 3 }, // Pürüzsüz ve kalın, çok daha profesyonel
-        
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shadeIntensity: 1,
-                opacityFrom: 0.25, 
-                opacityTo: 0.0,  
-                stops: [0, 90, 100]
-            }
-        },
-
-        markers: { size: 0, hover: { size: 6 } }, 
-        dataLabels: { enabled: false }, 
-
         tooltip: {
             theme: 'light',
-            x: { format: days === 1 ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }, 
-            y: { formatter: (value) => `$${value.toFixed(2)}` },
-            style: { fontSize: '13px', fontFamily: 'Inter' }
+            style: { fontSize: '12px', fontFamily: 'Inter' }
         },
-
         xaxis: {
             type: 'datetime',
             tickAmount: days >= 365 ? 5 : 6,
             labels: { 
-                style: { colors: '#64748b', fontSize: '12px', fontFamily: 'Inter', fontWeight: 500 },
+                style: { colors: '#71717a', fontSize: '12px', fontFamily: 'Inter' },
                 datetimeUTC: false,
                 formatter: function(val) {
                     if (!val) return '';
@@ -259,21 +245,18 @@ function loadCustomApexChart(item) {
             axisBorder: { show: false }, 
             axisTicks: { show: false }
         },
-
         yaxis: {
             opposite: false, 
             min: minPrice - (minPrice * 0.002),
             max: maxPrice + (maxPrice * 0.002),
             labels: {
-                style: { colors: '#64748b', fontSize: '12px', fontFamily: 'Inter', fontWeight: 600 },
+                style: { colors: '#71717a', fontSize: '12px', fontFamily: 'Inter' },
                 formatter: (value) => `$${value.toFixed(2)}`
             }
         },
-
         grid: {
-            show: true, borderColor: '#f1f5f9', strokeDashArray: 0, 
-            xaxis: { lines: { show: false } }, // Dikey çizgileri kapattık, sadece yataylar var
-            yaxis: { lines: { show: true } }, 
+            show: true, borderColor: '#e2e8f0', strokeDashArray: 4, 
+            xaxis: { lines: { show: true } }, yaxis: { lines: { show: true } }, 
             padding: { top: 10, right: 20, bottom: 20, left: 10 }
         }
     };
