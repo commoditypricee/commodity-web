@@ -4,7 +4,7 @@ function updateClock() {
     if(clockEl) {
         const datePart = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         const timePart = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-        clockEl.innerHTML = `${datePart} <span style="color: #475569; margin: 0 10px;">|</span> <span style="color: #f8fafc; font-weight: 600;">${timePart}</span>`;
+        clockEl.innerHTML = `${datePart} <span style="color: #3f3f46; margin: 0 10px;">|</span> <span style="color: #fafafa; font-weight: 600;">${timePart}</span>`;
     }
 }
 
@@ -170,27 +170,17 @@ function loadCustomApexChart(item) {
     const options = {
         series: [{ name: 'Price', data: filteredData }],
         chart: {
-            type: 'area', // Hafif bir gölge klas durur
+            type: 'line', 
             height: '100%',
             width: '100%',
             background: 'transparent', 
             fontFamily: 'Inter, sans-serif',
             toolbar: { show: false }, 
-            animations: { enabled: true, easing: 'easeinout', speed: 300 } 
+            animations: { enabled: true, easing: 'easeinout', speed: 200 } 
         },
         colors: ['#3b82f6'], 
-        stroke: { curve: 'smooth', width: 2 }, // Yumuşak çizgi modern gösterir
+        stroke: { curve: 'straight', width: 2 }, 
         
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shadeIntensity: 1,
-                opacityFrom: 0.2, 
-                opacityTo: 0.0,  
-                stops: [0, 90, 100]
-            }
-        },
-
         markers: { size: 0, hover: { size: 4 } }, 
         dataLabels: { enabled: false }, 
 
@@ -205,7 +195,7 @@ function loadCustomApexChart(item) {
             type: 'datetime',
             tickAmount: isLongTerm ? 5 : 6,
             labels: { 
-                style: { colors: '#94a3b8', fontSize: '12px', fontFamily: 'Inter' },
+                style: { colors: '#71717a', fontSize: '12px', fontFamily: 'Inter' },
                 datetimeUTC: false,
                 formatter: function(val) {
                     if (!val) return '';
@@ -229,18 +219,18 @@ function loadCustomApexChart(item) {
             min: minPrice - (minPrice * 0.002),
             max: maxPrice + (maxPrice * 0.002),
             labels: {
-                style: { colors: '#94a3b8', fontSize: '12px', fontFamily: 'Inter' },
+                style: { colors: '#71717a', fontSize: '12px', fontFamily: 'Inter' },
                 formatter: (value) => `$${value.toFixed(2)}`
             }
         },
 
         grid: {
             show: true,
-            borderColor: '#334155', // Arka plan çizgileriyle mükemmel uyum
-            strokeDashArray: 4, 
+            borderColor: '#27272a',
+            strokeDashArray: 3, 
             xaxis: { lines: { show: true } }, 
             yaxis: { lines: { show: true } }, 
-            padding: { top: 10, right: 20, bottom: 20, left: 10 }
+            padding: { top: 10, right: 20, bottom: 40, left: 10 }
         }
     };
 
