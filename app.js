@@ -4,7 +4,8 @@ function updateClock() {
     if(clockEl) {
         const datePart = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         const timePart = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-        clockEl.innerHTML = `${datePart} <span style="color: #3b82f6; margin: 0 10px; opacity: 0.5;">|</span> <span style="color: #ffffff; font-weight: 600; font-size: 1.1em;">${timePart}</span>`;
+        // Sade, ince ve şık saat formatı
+        clockEl.innerHTML = `${datePart} <span style="color: #52525b; margin: 0 10px;">|</span> <span style="color: #e2e8f0;">${timePart}</span>`;
     }
 }
 
@@ -20,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchMarketData(true); 
     setInterval(() => fetchMarketData(false), 60000); 
     
-    // BUTONLARA TIKLAMA
     document.querySelectorAll('.time-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
@@ -79,7 +79,7 @@ function applyTimeFilter(days, timeframeText) {
 
     let filteredData = [];
     let isIntraday = (days === 1);
-    let isLongTerm = (days >= 365); // 1 Yıl veya 5 Yıl
+    let isLongTerm = (days >= 365); 
 
     if (isIntraday) {
         if (currentItemIntraday && currentItemIntraday.length > 0) {
@@ -102,7 +102,6 @@ function applyTimeFilter(days, timeframeText) {
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
 
-    // DÜZELTME: series-1 yerine Price yazması için name eklendi
     mainApexChart.updateSeries([{ name: 'Price', data: filteredData }]);
     
     mainApexChart.updateOptions({
@@ -116,9 +115,9 @@ function applyTimeFilter(days, timeframeText) {
                         return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
                     }
                     if (isLongTerm) {
-                        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); // Örn: Mar 2024
+                        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }); 
                     }
-                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); // Örn: 15 Mar
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 }
             }
         },
@@ -128,7 +127,6 @@ function applyTimeFilter(days, timeframeText) {
         }
     });
 
-    // DÜZELTME: Başlığa PRICE eklendi
     document.getElementById('chart-title').textContent = `${currentSymbolName.toUpperCase()} PRICE (${timeframeText})`;
 }
 
@@ -144,7 +142,6 @@ function loadCustomApexChart(item) {
     const isIntraday = (days === 1);
     const isLongTerm = (days >= 365);
 
-    // DÜZELTME: İlk açılışta başlığa PRICE eklendi
     document.getElementById('chart-title').textContent = `${item.name.toUpperCase()} PRICE (${btnText})`;
 
     let filteredData = [];
@@ -172,44 +169,34 @@ function loadCustomApexChart(item) {
     if (mainApexChart) { mainApexChart.destroy(); }
 
     const options = {
-        // DÜZELTME: series-1 yerine Price yazması için name eklendi
         series: [{ name: 'Price', data: filteredData }],
         chart: {
-            type: 'area', 
+            type: 'line', // AREA YERİNE CİDDİ ÇİZGİ GRAFİĞİ (Line) YAPILDI
             height: '100%',
             width: '100%',
             background: 'transparent', 
-            fontFamily: 'Outfit, sans-serif',
+            fontFamily: 'Inter, sans-serif', // FONT DEĞİŞTİ
             toolbar: { show: false }, 
-            animations: { enabled: true, easing: 'easeinout', speed: 400 } 
+            animations: { enabled: true, easing: 'easeinout', speed: 300 } 
         },
         colors: ['#3b82f6'], 
         stroke: { curve: 'straight', width: 2 }, 
         
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shadeIntensity: 1,
-                opacityFrom: 0.3, 
-                opacityTo: 0.05,  
-                stops: [0, 90, 100]
-            }
-        },
-
-        markers: { size: 0, hover: { size: 6 } }, 
+        markers: { size: 0, hover: { size: 4 } }, 
         dataLabels: { enabled: false }, 
 
         tooltip: {
             theme: 'dark',
             x: { format: isIntraday ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }, 
-            y: { formatter: (value) => `$${value.toFixed(2)}` } 
+            y: { formatter: (value) => `$${value.toFixed(2)}` },
+            style: { fontSize: '13px', fontFamily: 'Inter' }
         },
 
         xaxis: {
             type: 'datetime',
             tickAmount: isLongTerm ? 5 : 6,
             labels: { 
-                style: { colors: '#94a3b8', fontSize: '12px', fontFamily: 'Outfit' },
+                style: { colors: '#71717a', fontSize: '12px', fontFamily: 'Inter' },
                 datetimeUTC: false,
                 formatter: function(val) {
                     if (!val) return '';
@@ -223,8 +210,8 @@ function loadCustomApexChart(item) {
                     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 }
             },
-            axisBorder: { show: true, color: '#334155' }, 
-            axisTicks: { show: true, color: '#334155' },
+            axisBorder: { show: false }, 
+            axisTicks: { show: false },
             tooltip: { enabled: false }
         },
 
@@ -233,18 +220,18 @@ function loadCustomApexChart(item) {
             min: minPrice - (minPrice * 0.002),
             max: maxPrice + (maxPrice * 0.002),
             labels: {
-                style: { colors: '#94a3b8', fontSize: '13px', fontFamily: 'Outfit' },
+                style: { colors: '#71717a', fontSize: '12px', fontFamily: 'Inter' },
                 formatter: (value) => `$${value.toFixed(2)}`
             }
         },
 
         grid: {
             show: true,
-            borderColor: '#1e293b',
-            strokeDashArray: 0, 
+            borderColor: '#27272a',
+            strokeDashArray: 3, // Izgara çizgileri kesikli yapıldı (daha profesyonel)
             xaxis: { lines: { show: true } }, 
             yaxis: { lines: { show: true } }, 
-            padding: { top: 10, right: 20, bottom: 50, left: 10 }
+            padding: { top: 10, right: 20, bottom: 40, left: 10 }
         }
     };
 
@@ -286,10 +273,9 @@ async function fetchMarketData(isFirstLoad = false) {
                 </div>
             `;
             
+            // Zıplama animasyonunu sildik, yerine sadece grafiği çağırma komutu bıraktık. CSS hover yeterli.
             card.addEventListener('click', () => {
                 loadCustomApexChart(item); 
-                card.style.transform = 'scale(0.98)';
-                setTimeout(() => card.style.transform = 'translateX(-5px)', 150);
             });
 
             container.appendChild(card);
