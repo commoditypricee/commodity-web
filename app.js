@@ -7,12 +7,13 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // En sorunsuz TradingView sembolleri
+// Özgür ve paylaşımı tamamen serbest olan alternatif semboller!
 const tvSymbols = {
-    'GC=F': 'COMEX:GC1!', // Altın
-    'SI=F': 'COMEX:SI1!', // Gümüş
-    'HG=F': 'COMEX:HG1!', // Bakır
-    'BZ=F': 'TVC:UKOIL',  // Brent Petrol (En stabil grafik)
-    'NG=F': 'NYMEX:NG1!'  // Doğalgaz
+    'GC=F': 'OANDA:XAUUSD',       // Altın (Ons)
+    'SI=F': 'OANDA:XAGUSD',       // Gümüş
+    'HG=F': 'CAPITALCOM:COPPER',  // Bakır
+    'BZ=F': 'OANDA:BCOUSD',       // Brent Petrol
+    'NG=F': 'OANDA:NATGASUSD'     // Doğalgaz
 };
 
 function loadTradingViewChart(symbol) {
