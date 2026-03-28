@@ -1,26 +1,21 @@
-// --- SAAT MOTURU (İNGİLİZCE FORMAT) ---
+// --- SAAT MOTURU ---
 function updateClock() {
     const now = new Date();
     
-    // Saat (00:00:00 formatı)
     const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
     const clockEl = document.getElementById('digital-clock');
     if(clockEl) clockEl.textContent = timeString;
     
-    // Tarih (Örn: March 28, 2026 formatı)
-    const dateString = now.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+    const dateString = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
     const dateEl = document.getElementById('date');
-    if(dateEl) dateEl.textContent = dateString;
+    if(dateEl) dateEl.textContent = dateString.toUpperCase();
 }
 
-// Sayfa yüklendiğinde her şeyi başlat
 document.addEventListener("DOMContentLoaded", () => {
     updateClock();
     setInterval(updateClock, 1000);
-
     fetchMarketData();
     setInterval(fetchMarketData, 60000); 
-    
     setTimeout(() => loadTradingViewChart('GC=F'), 500);
 });
 
@@ -32,7 +27,6 @@ const tvSymbols = {
     'NG=F': 'OANDA:NATGASUSD'
 };
 
-// EMTİA İSİMLERİ ARTIK TAMAMEN İNGİLİZCE
 const customNames = {
     'GC=F': 'Gold',
     'SI=F': 'Silver',
@@ -51,21 +45,21 @@ function loadTradingViewChart(symbol) {
             "autosize": true,
             "symbol": activeSymbol,
             "interval": "D",
-            "timezone": "Etc/UTC", // Uluslararası standart saat dilimi
+            "timezone": "Etc/UTC",
             "theme": "dark",
             "style": "2",
-            "locale": "en", // GRAFİK DİLİ İNGİLİZCE OLDU
+            "locale": "en",
             "enable_publishing": false,
-            "backgroundColor": "#080808",
-            "gridColor": "rgba(255, 255, 255, 0.03)",
+            // Grafik arka planını yeni tasarımımızın rengine uyumlu yaptık
+            "backgroundColor": "#111827", 
+            "gridColor": "#1F2937",
             "hide_top_toolbar": false,
             "hide_legend": false,
             "save_image": false,
             "container_id": "chart-container"
         });
     } else {
-        // Hata mesajı da İngilizce
-        container.innerHTML = '<p style="color:gray; text-align:center; padding-top:200px;">Chart could not be loaded. Please disable your ad blocker.</p>';
+        container.innerHTML = '<p style="color:#94A3B8; text-align:center; padding-top:200px;">Chart could not be loaded.</p>';
     }
 }
 
@@ -76,31 +70,29 @@ async function fetchMarketData() {
         const data = await response.json();
         
         container.innerHTML = ''; 
-        const icons = { 'GC=F': '🥇', 'SI=F': '🥈', 'HG=F': '🥉', 'BZ=F': '🛢️', 'NG=F': '🔥' };
 
         data.forEach(item => {
             const isPositive = parseFloat(item.changePercent) >= 0;
             const colorClass = isPositive ? 'positive' : 'negative';
             const sign = isPositive ? '+' : '';
-            const icon = icons[item.symbol] || '📊';
             
-            // İngilizce sözlükten isimleri çek
             const cleanName = customNames[item.symbol] || item.name;
 
             const card = document.createElement('div');
             card.className = 'card';
-            card.style.cursor = 'pointer'; 
             
+            // EMOJİLER SİLİNDİ, TERTEMİZ HTML
             card.innerHTML = `
-                <h2>${icon} ${cleanName}</h2>
+                <h2>${cleanName}</h2>
                 <div class="price">$${item.price}</div>
                 <div class="change ${colorClass}">${sign}${item.changePercent}%</div>
             `;
             
             card.addEventListener('click', () => {
                 loadTradingViewChart(item.symbol);
-                card.style.transform = 'scale(0.97)';
-                setTimeout(() => card.style.transform = 'scale(1)', 100);
+                // Yeni tasarıma uygun çok hafif, şık bir tıklama efekti
+                card.style.transform = 'translateY(2px)';
+                setTimeout(() => card.style.transform = 'translateY(0)', 150);
             });
 
             container.appendChild(card);
