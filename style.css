@@ -1,10 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* --- SIFIRLAMA VE TEMEL AYARLAR --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
 body {
-    background-color: #f8fafc; /* Ferah Beyaz Zemin */
-    color: #111827; /* Koyu metin */
+    /* GERÇEK BEYAZ / AÇIK GRİ TEMA */
+    background-color: #f8fafc; 
+    color: #111827; /* Koyu metin, mükemmel kontrast */
     font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -25,7 +31,7 @@ body {
 
 .bento-grid {
     display: grid; grid-template-columns: minmax(0, 7.5fr) minmax(0, 2.5fr); 
-    gap: 30px; align-items: start; width: 100%;
+    gap: 24px; align-items: start; width: 100%;
 }
 
 .main-chart-wrapper {
@@ -43,32 +49,51 @@ body {
     font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
 }
 .time-btn:hover { color: #111827; }
-.time-btn.active { background: #ffffff; color: #111827; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.time-btn.active { background: #f1f5f9; color: #111827; border-color: #cbd5e1; }
 
 .main-chart { height: 400px; width: 100%; margin-bottom: 30px; }
 
 /* === GOLDPRICE.ORG BİREBİR TABLO TASARIMI === */
-.performance-stats {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 100%;
-    border-top: 1px dashed #cbd5e1;
-    padding-top: 20px;
-}
-
-.stat-box {
+.gp-table-wrapper {
     background: #ffffff;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 12px 10px;
-    display: flex;
-    justify-content: space-between; 
-    align-items: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
 }
-.stat-box:last-child { border-bottom: none; }
 
-.stat-label { font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; }
-.stat-value { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.gp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+}
+
+.gp-table thead { background: #f8fafc; border-bottom: 2px solid #e2e8f0; }
+
+.gp-table th {
+    text-align: left;
+    padding: 14px 20px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+.gp-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.gp-table tr:last-child td { border-bottom: none; }
+.gp-table tr:hover { background: #f8fafc; } /* Satır üzerine gelince hafif aydınlanma */
+
+.right-align { text-align: right !important; }
+.gp-positive { color: #10b981; } /* Borsa Yeşili */
+.gp-negative { color: #ef4444; } /* Borsa Kırmızısı */
 
 /* SAĞ KARTLAR */
 .cards-wrapper { display: flex; flex-direction: column; gap: 12px; width: 100%; }
