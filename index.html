@@ -3,48 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CommodityPrice Live Market Tracker</title>
+    <title>Commodity Terminal Pro</title>
     <link rel="stylesheet" href="style.css"> 
-    <style>
-        /* Grafiğin daha şık durması için ufak bir arka plan ayarı */
-        body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        /* Kartların yan yana şık durması için ızgara yapısı */
-        .grid-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-    </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>CommodityPrice</h1>
-        <p>Live Market Tracker</p>
+    <div class="top-panel">
+        <div class="brand">
+            <span class="logo">🥇</span>
+            <h1>Commodity<span class="pro-tag">Terminal PRO</span></h1>
+        </div>
+        
+        <div class="live-info">
+            <div id="date" class="date-display">...</div>
+            <div id="digital-clock" class="clock-display">00:00:00</div>
+            <div class="status-indicator">
+                <span class="pulse-dot"></span>
+                <span>SYSTEM LIVE</span>
+            </div>
+        </div>
     </div>
 
-    <div id="chart-container" style="height: 450px; width: 100%; max-width: 1000px; margin: 30px auto; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.5);"></div>
+    <div id="chart-container" class="chart-glass">
+        </div>
 
     <div id="market-data" class="grid-container">
-        <div class="loading">Piyasa verileri yükleniyor, lütfen bekleyin...</div>
-    </div>
-<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+        </div>
+
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     
     <script src="app.js?v=2"></script>
-</body>
-</html>
 </body>
 </html>
