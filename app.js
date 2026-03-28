@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => loadTradingViewChart('GC=F'), 500);
 });
 
-// En sorunsuz TradingView sembolleri
 // Özgür ve paylaşımı tamamen serbest olan alternatif semboller!
 const tvSymbols = {
     'GC=F': 'OANDA:XAUUSD',       // Altın (Ons)
@@ -17,9 +16,11 @@ const tvSymbols = {
 };
 
 function loadTradingViewChart(symbol) {
-    const activeSymbol = tvSymbols[symbol] || 'COMEX:GC1!';
+    const activeSymbol = tvSymbols[symbol] || 'OANDA:XAUUSD';
     
-    // TradingView kütüphanesi gerçekten yüklendi mi diye kontrol ediyoruz
+    const container = document.getElementById('chart-container');
+    container.innerHTML = ''; // Eski grafiği temizle
+
     if (typeof TradingView !== 'undefined') {
         new TradingView.widget({
             "autosize": true,
@@ -38,9 +39,7 @@ function loadTradingViewChart(symbol) {
             "container_id": "chart-container"
         });
     } else {
-        // Eğer reklam engelleyici TradingView'u engellediyse kullanıcıyı uyarıyoruz
-        document.getElementById('chart-container').innerHTML = 
-            '<p style="color:gray; text-align:center; padding-top:200px;">Grafik yüklenemedi. Lütfen reklam engelleyicinizi (AdBlock) kapatıp sayfayı yenileyin.</p>';
+        container.innerHTML = '<p style="color:gray; text-align:center; padding-top:200px;">Grafik yüklenemedi. Lütfen reklam engelleyicinizi kapatıp sayfayı yenileyin.</p>';
     }
 }
 
