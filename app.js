@@ -1,12 +1,14 @@
-// --- SAAT MOTURU ---
+// --- SAAT MOTURU (İNGİLİZCE FORMAT) ---
 function updateClock() {
     const now = new Date();
     
-    const timeString = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    // Saat (00:00:00 formatı)
+    const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
     const clockEl = document.getElementById('digital-clock');
     if(clockEl) clockEl.textContent = timeString;
     
-    const dateString = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+    // Tarih (Örn: March 28, 2026 formatı)
+    const dateString = now.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
     const dateEl = document.getElementById('date');
     if(dateEl) dateEl.textContent = dateString;
 }
@@ -30,13 +32,13 @@ const tvSymbols = {
     'NG=F': 'OANDA:NATGASUSD'
 };
 
-// YAHOO'NUN KARMAŞIK İSİMLERİNİ TÜRKÇE VE SADE HALE GETİRİYORUZ
+// EMTİA İSİMLERİ ARTIK TAMAMEN İNGİLİZCE
 const customNames = {
-    'GC=F': 'Altın (Ons)',
-    'SI=F': 'Gümüş',
-    'HG=F': 'Bakır',
-    'BZ=F': 'Brent Petrol',
-    'NG=F': 'Doğalgaz'
+    'GC=F': 'Gold',
+    'SI=F': 'Silver',
+    'HG=F': 'Copper',
+    'BZ=F': 'Brent Oil',
+    'NG=F': 'Natural Gas'
 };
 
 function loadTradingViewChart(symbol) {
@@ -49,10 +51,10 @@ function loadTradingViewChart(symbol) {
             "autosize": true,
             "symbol": activeSymbol,
             "interval": "D",
-            "timezone": "Europe/Istanbul",
+            "timezone": "Etc/UTC", // Uluslararası standart saat dilimi
             "theme": "dark",
             "style": "2",
-            "locale": "tr",
+            "locale": "en", // GRAFİK DİLİ İNGİLİZCE OLDU
             "enable_publishing": false,
             "backgroundColor": "#080808",
             "gridColor": "rgba(255, 255, 255, 0.03)",
@@ -62,7 +64,8 @@ function loadTradingViewChart(symbol) {
             "container_id": "chart-container"
         });
     } else {
-        container.innerHTML = '<p style="color:gray; text-align:center; padding-top:200px;">Grafik yüklenemedi. Lütfen reklam engelleyiciyi kapatın.</p>';
+        // Hata mesajı da İngilizce
+        container.innerHTML = '<p style="color:gray; text-align:center; padding-top:200px;">Chart could not be loaded. Please disable your ad blocker.</p>';
     }
 }
 
@@ -81,7 +84,7 @@ async function fetchMarketData() {
             const sign = isPositive ? '+' : '';
             const icon = icons[item.symbol] || '📊';
             
-            // BURASI YENİ: Eğer sözlükte karşılığı varsa temiz ismi kullan, yoksa Yahoo'dan geleni yaz.
+            // İngilizce sözlükten isimleri çek
             const cleanName = customNames[item.symbol] || item.name;
 
             const card = document.createElement('div');
@@ -103,6 +106,6 @@ async function fetchMarketData() {
             container.appendChild(card);
         });
     } catch (error) {
-        console.error("Veri okuma hatası:", error);
+        console.error("Data fetch error:", error);
     }
 }
