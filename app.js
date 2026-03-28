@@ -99,19 +99,12 @@ function applyTimeFilter(days, timeframeText) {
 
     mainApexChart.updateSeries([{ data: filteredData }]);
     
+    // EKSENLERİ GÜNCELLEME (En temiz ve hatasız yöntem)
     mainApexChart.updateOptions({
         xaxis: {
-            // EKSENİ ZORLA 8 EŞİT PARÇAYA BÖL (Sorunu çözen anahtar burası)
-            tickAmount: isIntraday ? 8 : 6,
+            tickAmount: 6, // Ekranda tam 6 tane tarih/saat çizgisi çıkar
             labels: {
-                formatter: function(val) {
-                    if (!val) return '';
-                    const date = new Date(val);
-                    if (isIntraday) {
-                        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-                    }
-                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                }
+                format: isIntraday ? 'HH:mm' : 'dd MMM' // 1 günse saat, değilse gün/ay yaz (Apex'in kendi motoru)
             }
         },
         yaxis: {
@@ -190,19 +183,11 @@ function loadCustomApexChart(item) {
 
         xaxis: {
             type: 'datetime',
-            // GRAFİK İLK YÜKLENDİĞİNDE DE 8 PARÇAYA BÖL
-            tickAmount: isIntraday ? 8 : 6,
+            tickAmount: 6, // Her zaman ekseni 6 eşit parçaya böl
             labels: { 
                 style: { colors: '#94a3b8', fontSize: '12px', fontFamily: 'Outfit' },
                 datetimeUTC: false,
-                formatter: function(val) {
-                    if (!val) return '';
-                    const date = new Date(val);
-                    if (isIntraday) {
-                        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-                    }
-                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                }
+                format: isIntraday ? 'HH:mm' : 'dd MMM' // Sadece yerleşik formati kullan
             },
             axisBorder: { show: true, color: '#334155' }, 
             axisTicks: { show: true, color: '#334155' },
@@ -232,7 +217,7 @@ function loadCustomApexChart(item) {
     mainApexChart = new ApexCharts(container, options);
     mainApexChart.render();
 }
-
+// Alt kısım fetchMarketData aynı kaldı...
 async function fetchMarketData(isFirstLoad = false) {
     const container = document.getElementById('market-data');
     try {
