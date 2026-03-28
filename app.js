@@ -151,10 +151,12 @@ function applyTimeFilter(days) {
 
     mainApexChart.updateSeries([{ name: 'Price', data: filteredData }]);
     
+    // GÜNCELLEMEDE BİLE FONT STİLİNİ (KİLİDİNİ) KORUYAN ALAN BURASI
     mainApexChart.updateOptions({
         xaxis: {
             tickAmount: days >= 365 ? 5 : 6,
             labels: {
+                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 600 }, // Stil korundu
                 formatter: function(val) {
                     if (!val) return '';
                     const date = new Date(val);
@@ -164,7 +166,14 @@ function applyTimeFilter(days) {
                 }
             }
         },
-        yaxis: { min: minPrice - (minPrice * 0.002), max: maxPrice + (maxPrice * 0.002) }
+        yaxis: { 
+            min: minPrice - (minPrice * 0.002), 
+            max: maxPrice + (maxPrice * 0.002),
+            labels: {
+                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 600 }, // Stil korundu
+                formatter: (value) => `$${value.toFixed(2)}`
+            }
+        }
     });
 }
 
@@ -220,13 +229,13 @@ function loadCustomApexChart(item) {
             theme: 'light',
             x: { format: days === 1 ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }, 
             y: { formatter: (value) => `$${value.toFixed(2)}` },
-            style: { fontSize: '14px', fontFamily: 'Inter' }
+            style: { fontSize: '14px', fontFamily: 'Inter', fontWeight: 500 }
         },
         xaxis: {
             type: 'datetime',
             tickAmount: days >= 365 ? 5 : 6,
             labels: { 
-                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 700 }, 
+                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 600 }, 
                 datetimeUTC: false,
                 formatter: function(val) {
                     if (!val) return '';
@@ -236,7 +245,7 @@ function loadCustomApexChart(item) {
                     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 }
             },
-            axisBorder: { show: true, color: '#cbd5e1' }, // Eksen sınırı belirginleştirildi
+            axisBorder: { show: true, color: '#cbd5e1' }, 
             axisTicks: { show: true, color: '#cbd5e1' }
         },
         yaxis: {
@@ -244,17 +253,16 @@ function loadCustomApexChart(item) {
             min: minPrice - (minPrice * 0.002),
             max: maxPrice + (maxPrice * 0.002),
             labels: {
-                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 700 }, 
+                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 600 }, 
                 formatter: (value) => `$${value.toFixed(2)}`
             }
         },
-        // İŞTE YENİ BELİRGİN KILAVUZ ÇİZGİLER (GRID)
         grid: {
             show: true, 
-            borderColor: '#cbd5e1', // Çok daha koyu ve doygun bir gri
-            strokeDashArray: 3, // Kesikler küçültüldü, çizgi daha devamlı görünecek
+            borderColor: '#cbd5e1', 
+            strokeDashArray: 3, 
             position: 'back',
-            xaxis: { lines: { show: true } }, // Dikey çizgileri de net açtık
+            xaxis: { lines: { show: true } }, 
             yaxis: { lines: { show: true } }, 
             padding: { top: 10, right: 20, bottom: 20, left: 10 }
         }
