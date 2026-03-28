@@ -3,7 +3,6 @@ const https = require('https');
 
 function getYahooData(symbol) {
     return new Promise((resolve, reject) => {
-        // 5 yıllık günlük veri çekiyoruz (range=5y)
         const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=5y`;
         
         https.get(url, {
