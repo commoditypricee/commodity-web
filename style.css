@@ -8,9 +8,9 @@
 }
 
 body {
-    background-color: #0f172a; /* Çok şık, derin koyu lacivert/gri */
-    color: #f8fafc;
-    font-family: 'Inter', sans-serif;
+    background-color: #09090b; /* Tamamen koyu, göz yormayan profesyonel zemin */
+    color: #fafafa;
+    font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     padding-bottom: 40px;
@@ -28,51 +28,52 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    border-bottom: 1px solid #27272a;
+    padding-bottom: 20px;
 }
 
 .logo { 
-    font-size: 26px; 
+    font-size: 24px; 
     font-weight: 700; 
     letter-spacing: -0.5px; 
     color: #ffffff;
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .logo span { 
     color: #3b82f6; 
 }
 
-/* --- SAAT VE TARİH KUTUSU --- */
+/* Saat Alanı (Sade ve Okunaklı) */
 .clock-pill {
-    background: #1e293b;
-    border: 1px solid #334155;
-    padding: 10px 20px;
-    border-radius: 10px;
     font-size: 15px; 
-    color: #cbd5e1;
+    color: #a1a1aa;
     font-weight: 500;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     display: flex;
     align-items: center;
+    letter-spacing: 0.5px;
 }
 
-/* --- ANA IZGARA --- */
+/* --- ANA IZGARA (Kayma Sorununun Çözüldüğü Yer) --- */
 .bento-grid {
     display: grid;
-    grid-template-columns: 2.5fr 1fr;
+    grid-template-columns: 2.5fr 1fr; /* Sol 2.5 kat, sağ 1 kat yer kaplar */
     gap: 24px;
     align-items: start;
 }
 
+/* SİHİRLİ KOD: Grafiğin sağdaki kartları aşağı itmesini kesin olarak engeller */
+.bento-item, .cards-wrapper {
+    min-width: 0; 
+}
+
 /* --- SOL: GRAFİK ALANI --- */
 .main-chart-wrapper {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 16px;
+    background: #0f0f11;
+    border: 1px solid #27272a;
+    border-radius: 8px; /* Keskin köşeler, ciddiyet katar */
     padding: 24px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
 }
 
 .chart-header {
@@ -83,42 +84,36 @@ body {
 }
 
 #chart-title {
-    font-size: 20px;
-    color: #f1f5f9;
+    font-size: 18px;
+    color: #ffffff;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
-/* Filtre Butonları */
+/* Borsa Standardı Filtre Butonları */
 .time-filters {
     display: flex;
-    background: #0f172a;
-    padding: 4px;
-    border-radius: 8px;
-    border: 1px solid #334155;
+    gap: 4px;
 }
 
 .time-btn {
     background: transparent;
-    border: none;
-    color: #94a3b8;
+    border: 1px solid transparent;
+    color: #a1a1aa;
     padding: 6px 14px;
-    border-radius: 6px;
+    border-radius: 4px;
     font-family: 'Inter', sans-serif;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
-.time-btn:hover { 
-    color: #f8fafc; 
-}
-
+.time-btn:hover { color: #fafafa; }
 .time-btn.active {
-    background: #3b82f6; 
+    background: #27272a; 
     color: #ffffff;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    border-color: #3f3f46;
 }
 
 .main-chart {
@@ -130,70 +125,63 @@ body {
 .cards-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
 }
 
 .card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
+    background: #0f0f11;
+    border: 1px solid #27272a;
+    border-radius: 8px;
     padding: 20px;
     display: flex;
     justify-content: space-between; 
     align-items: center;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .card:hover {
-    border-color: #3b82f6;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+    border-color: #52525b; /* Hafif çerçeve aydınlanması */
+    background: #18181b;
 }
 
 .card-info h2 {
-    margin: 0 0 6px 0;
-    font-size: 14px;
-    color: #94a3b8;
+    margin: 0 0 4px 0;
+    font-size: 13px;
+    color: #a1a1aa;
     font-weight: 600;
-    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .card-info .price {
     font-size: 24px;
-    color: #f8fafc;
-    font-weight: 700;
+    color: #ffffff;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums; /* Rakamların ekranda titremesini engeller */
 }
 
 /* Yüzde Rozetleri */
 .badge {
-    padding: 6px 10px;
-    border-radius: 6px;
+    padding: 4px 8px;
+    border-radius: 4px;
     font-size: 13px;
     font-weight: 600;
 }
 
-.positive { 
-    background: rgba(16, 185, 129, 0.15); 
-    color: #34d399; 
-}
+.positive { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.negative { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
-.negative { 
-    background: rgba(244, 63, 94, 0.15); 
-    color: #fb7185; 
-}
+/* Scrollbar (Kaydırma Çubuğu) Özelleştirmesi */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #09090b; }
+::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
-/* Kaydırma Çubuğu Özelleştirmesi */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #0f172a; }
-::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-/* Mobil Uyumluluk */
+/* Telefon Uyumları */
 @media (max-width: 1024px) {
     .bento-grid { grid-template-columns: 1fr; }
     .chart-header { flex-direction: column; gap: 15px; align-items: flex-start; }
-    .time-filters { width: 100%; justify-content: space-between; }
+    .time-filters { width: 100%; overflow-x: auto; }
     .main-chart { height: 350px; }
 }
