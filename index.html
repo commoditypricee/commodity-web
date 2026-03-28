@@ -7,7 +7,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="style.css?v=999">
+    <link rel="stylesheet" href="style.css?v=2024">
 </head>
 <body>
 
@@ -21,7 +21,7 @@
             
             <div class="bento-item main-chart-wrapper">
                 <div class="chart-header">
-                    <h2 id="chart-title">GOLD PRICE (1 Day)</h2>
+                    <h2 id="chart-title">GOLD PRICE</h2>
                     <div class="time-filters">
                         <button class="time-btn active" data-days="1">1 Day</button>
                         <button class="time-btn" data-days="30">1 Month</button>
@@ -30,7 +30,14 @@
                         <button class="time-btn" data-days="1825">5 Years</button>
                     </div>
                 </div>
-                <div class="main-chart" id="chart-container"></div>
+                
+                <div class="chart-content-flex">
+                    <div class="main-chart" id="chart-container"></div>
+                    
+                    <div class="performance-stats-vertical" id="perf-stats">
+                        </div>
+                </div>
+
             </div>
 
             <div class="cards-wrapper" id="market-data">
@@ -40,6 +47,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script src="app.js?v=500"></script> 
+    <script src="app.js?v=2024"></script> 
 </body>
 </html>
