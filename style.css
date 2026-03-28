@@ -9,8 +9,8 @@ body {
     color: #ffffff;
     font-family: 'Outfit', sans-serif;
     margin: 0;
-    height: 100vh;
-    overflow-x: hidden;
+    /* DÜZELTME: Fixed height (100vh) ve overflow: hidden kaldırıldı, standart kaydırma (scrolling) izin verildi. */
+    min-height: 100vh;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -53,8 +53,10 @@ body {
     display: grid;
     grid-template-columns: 2.2fr 1fr; /* Sol tarafa biraz daha nefes aldırdık */
     gap: 30px;
-    height: calc(100vh - 180px);
-    min-height: 650px;
+    /* DÜZELTME: Fixed height (calc(...)) ve min-height kaldırıldı.
+       Bunun yerine, içeriğin boyutuna göre esnemesi için height: auto yapıldı ve en az viewport yüksekliği kadar olması sağlandı. */
+    height: auto;
+    min-height: calc(100vh - 180px);
 }
 
 /* --- SOL: GRAFİK ALANI (Cam Efekti) --- */
@@ -68,7 +70,7 @@ body {
     padding: 30px;
     box-shadow: 0 24px 40px rgba(0, 0, 0, 0.4);
     position: relative;
-    overflow: hidden;
+    /* DÜZELTME: overflow: hidden kaldırıldı. Artık alttaki saatler/tarihler gizlenmeyecek. */
 }
 
 /* Grafik arkasına çok hafif bir glow */
@@ -142,16 +144,16 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    height: 100%;
-    overflow-y: auto;
+    /* DÜZELTME: height: 100% ve overflow-y: auto kaldırıldı. Artık tüm sayfa kayacak, sadece kartlar değil. */
+    height: auto;
     padding-right: 10px;
 }
 
-/* Klasik çirkin scrollbar yerine zarif bir çizgi */
-.cards-wrapper::-webkit-scrollbar { width: 4px; }
-.cards-wrapper::-webkit-scrollbar-track { background: transparent; }
-.cards-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-.cards-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+/* Klasik çirkin scrollbar yerine zarif bir çizgi (Anasayfada genel scrollbar için) */
+body::-webkit-scrollbar { width: 6px; }
+body::-webkit-scrollbar-track { background: transparent; }
+body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
 /* --- KART TASARIMLARI --- */
 .card {
@@ -218,7 +220,7 @@ body {
     box-shadow: 0 0 10px rgba(239, 68, 68, 0.05);
 }
 
-/* TELEFONLAR İÇİN ALT ALTA DİZİLİM */
+/* TELEFONLAR İÇİN ALT ALTA DİZİLİM (Uyumlu) */
 @media (max-width: 1024px) {
     .dashboard-wrapper { padding: 20px; }
     .bento-grid { grid-template-columns: 1fr; height: auto; }
