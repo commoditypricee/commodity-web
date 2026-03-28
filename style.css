@@ -1,22 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
-
-/* --- GENEL AYARLAR & PREMIUM ARKA PLAN --- */
+/* --- PROFESYONEL FİNANS TERMİNALİ TASARIMI --- */
 body {
-    background-color: #0b0e14;
-    background-image: 
-        radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08), transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(34, 197, 94, 0.05), transparent 25%);
-    color: #ffffff;
-    font-family: 'Outfit', sans-serif;
+    background-color: #09090b; /* Tamamen koyu, göz yormayan zemin */
+    color: #fafafa;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     margin: 0;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
 }
 
 .dashboard-wrapper {
-    max-width: 1440px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 40px;
+    padding: 30px;
 }
 
 /* --- NAVİGASYON --- */
@@ -24,202 +19,170 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #27272a;
+    padding-bottom: 20px;
 }
 
 .logo { 
-    font-size: 28px; 
+    font-size: 24px; 
     font-weight: 700; 
     letter-spacing: -0.5px; 
-    text-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+    color: #ffffff;
 }
-.logo span { color: #3b82f6; }
+.logo span { color: #71717a; font-weight: 400; }
 
-/* SAAT TASARIMI GÜNCELLENDİ (Daha büyük ve profesyonel) */
+/* Sade, kutusuz, net saat gösterimi */
 .clock-pill {
-    background: rgba(19, 21, 27, 0.8);
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    padding: 12px 24px;
-    border-radius: 12px; 
-    font-size: 18px; 
-    color: #e2e8f0;
+    font-size: 15px; 
+    color: #a1a1aa;
     font-weight: 500;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     display: flex;
     align-items: center;
     letter-spacing: 0.5px;
 }
 
-/* --- ANA YAPI (Bento Grid) --- */
+/* --- ANA YAPI --- */
 .bento-grid {
     display: grid;
-    grid-template-columns: 2.2fr 1fr; 
-    gap: 30px;
+    grid-template-columns: 2.5fr 1fr; /* Grafik alanı daha da genişletildi */
+    gap: 20px;
     height: auto;
-    min-height: calc(100vh - 180px);
+    min-height: calc(100vh - 150px);
 }
 
-/* --- SOL: GRAFİK ALANI (Cam Efekti) --- */
+/* --- SOL: GRAFİK ALANI (Tamamen Düz ve Keskin) --- */
 .main-chart-wrapper {
-    background: rgba(19, 21, 27, 0.7);
-    backdrop-filter: blur(20px);
-    border-radius: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: #0f0f11;
+    border: 1px solid #27272a;
+    border-radius: 6px; /* Keskin hatlar */
     display: flex;
     flex-direction: column;
-    padding: 30px;
-    box-shadow: 0 24px 40px rgba(0, 0, 0, 0.4);
-    position: relative;
-}
-
-.main-chart-wrapper::before {
-    content: '';
-    position: absolute;
-    top: -50px;
-    left: -50px;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
-    z-index: 0;
+    padding: 24px;
 }
 
 .chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding-bottom: 24px;
-    margin-bottom: 20px;
-    z-index: 1;
+    border-bottom: 1px solid #27272a;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
 }
 
 #chart-title {
     margin: 0;
-    font-size: 22px;
-    color: #f8fafc;
+    font-size: 18px;
+    color: #ffffff;
     font-weight: 600;
     letter-spacing: 0.5px;
-    text-transform: uppercase;
 }
 
+/* Klasik Borsa Filtre Butonları */
 .time-filters {
     display: flex;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 14px;
-    padding: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    gap: 4px;
 }
 
 .time-btn {
     background: transparent;
-    border: none;
-    color: #64748b;
-    padding: 8px 18px;
-    border-radius: 10px;
-    font-family: 'Outfit', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+    border: 1px solid transparent;
+    color: #a1a1aa;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.15s ease;
 }
 
-.time-btn:hover { color: #e2e8f0; }
+.time-btn:hover { color: #fafafa; }
 
 .time-btn.active {
-    background: #3b82f6; 
+    background: #27272a; 
     color: #ffffff;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    border-color: #3f3f46;
 }
 
 .main-chart {
     flex-grow: 1;
-    min-height: 400px;
-    z-index: 1;
+    min-height: 450px;
 }
 
 /* --- SAĞ: KARTLAR ALANI --- */
 .cards-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 12px; /* Kartlar arası boşluk azaltıldı, daha derli toplu */
     height: auto;
-    padding-right: 10px;
 }
 
 body::-webkit-scrollbar { width: 6px; }
-body::-webkit-scrollbar-track { background: transparent; }
-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+body::-webkit-scrollbar-track { background: #09090b; }
+body::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+body::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
-/* --- KART TASARIMLARI --- */
+/* --- KART TASARIMLARI (Pavyon Değil, Terminal) --- */
 .card {
-    background: rgba(19, 21, 27, 0.6);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    border-radius: 24px;
-    padding: 26px;
+    background: #0f0f11;
+    border: 1px solid #27272a;
+    border-radius: 6px;
+    padding: 20px;
     display: flex;
     justify-content: space-between; 
     align-items: center;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .card:hover {
-    border-color: rgba(59, 130, 246, 0.4);
-    transform: translateY(-6px); 
-    background: rgba(23, 27, 36, 0.8);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 15px rgba(59, 130, 246, 0.1);
+    border-color: #52525b; /* Sadece zarif bir çerçeve rengi değişimi */
+    background: #18181b;
 }
 
 .card-info h2 {
-    margin: 0 0 6px 0;
-    font-size: 14px;
-    color: #94a3b8;
-    font-weight: 500;
+    margin: 0 0 4px 0;
+    font-size: 13px;
+    color: #a1a1aa;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 1px;
 }
 
 .card-info .price {
-    font-size: 28px;
-    color: #f8fafc;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+    font-size: 24px;
+    color: #ffffff;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums; /* Rakamların hizalı durması için finansal standart */
 }
 
-/* --- ROZETLER (Yüzdelik Değişimler) --- */
+/* --- ROZETLER (Tamamen Düz, Gölgesiz) --- */
 .card-status { text-align: right; }
 
 .badge {
-    padding: 8px 14px;
-    border-radius: 12px;
-    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 13px;
     font-weight: 600;
     display: inline-block;
-    transition: all 0.3s ease;
 }
 
+/* Borsa Standardı Keskin Renkler */
 .positive { 
-    background: rgba(34, 197, 94, 0.1); 
-    color: #4ade80; 
-    border: 1px solid rgba(34, 197, 94, 0.2);
-    box-shadow: 0 0 10px rgba(34, 197, 94, 0.05);
+    background: rgba(16, 185, 129, 0.1); 
+    color: #10b981; 
 }
 
 .negative { 
     background: rgba(239, 68, 68, 0.1); 
-    color: #f87171; 
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.05);
+    color: #ef4444; 
 }
 
+/* MOBİL UYUM */
 @media (max-width: 1024px) {
-    .dashboard-wrapper { padding: 20px; }
-    .bento-grid { grid-template-columns: 1fr; height: auto; }
-    .chart-header { flex-direction: column; gap: 20px; align-items: flex-start; }
-    .time-filters { width: 100%; justify-content: space-between; }
-    .time-btn { flex: 1; text-align: center; }
-    .main-chart { height: 400px; }
+    .bento-grid { grid-template-columns: 1fr; }
+    .chart-header { flex-direction: column; gap: 15px; align-items: flex-start; }
+    .time-filters { width: 100%; overflow-x: auto; }
+    .main-chart { height: 350px; }
 }
