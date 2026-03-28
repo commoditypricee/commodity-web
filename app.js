@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(() => fetchMarketData(false), 60000); 
 });
 
-// --- APEXCHARTS: GOLDPRICE.ORG STANDARTLARI ---
+// --- APEXCHARTS: ORTAOKUL MATEMATİK STANDARDI (Sade Çizgi Grafiği) ---
 function loadCustomApexChart(item) {
     const container = document.getElementById('chart-container');
     
@@ -24,28 +24,20 @@ function loadCustomApexChart(item) {
         mainApexChart.destroy();
     }
 
-    // 1. Zoom İçin Veri Analizi (En yüksek ve en düşük fiyatı bul)
+    // Fiyat skalasını (sol eksen) daraltmak için en düşük ve yüksek değerleri buluyoruz
     const prices = item.history.map(h => h.y);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
-    
-    // Ufak bir pay bırakarak grafiği sadece o aralığa sıkıştır
-    const yAxisMin = minPrice - (minPrice * 0.005); 
-    const yAxisMax = maxPrice + (maxPrice * 0.005);
-
-    // 2. Trend Rengi (Son 30 günde arttı mı azaldı mı?)
-    const firstPrice = prices[0];
-    const lastPrice = prices[prices.length - 1];
-    const isTrendPositive = lastPrice >= firstPrice;
-    const chartColor = isTrendPositive ? '#10B981' : '#EF4444'; // Artış Yeşil, Düşüş Kırmızı
+    const yAxisMin = minPrice - (minPrice * 0.01); 
+    const yAxisMax = maxPrice + (maxPrice * 0.01);
 
     const options = {
         series: [{
-            name: item.name,
+            name: 'Price',
             data: item.history 
         }],
         chart: {
-            type: 'area', 
+            type: 'line', // İŞTE BU: Boyalı alan iptal, sadece klasik çizgi!
             height: '100%',
             width: '100%',
             background: 'transparent', 
@@ -53,74 +45,66 @@ function loadCustomApexChart(item) {
             toolbar: { show: false }, 
             animations: { enabled: true, easing: 'easeinout', speed: 400 }, 
         },
-        colors: [chartColor], 
-        // Keskin kırılımlar (gerçek piyasa verisi gibi)
-        stroke: { curve: 'straight', width: 2 }, 
-        fill: {
-            type: 'gradient',
-            gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.0, stops: [0, 100] }
-        },
-        dataLabels: { enabled: false }, 
+        colors: ['#5b68df'], // Sabit, göz yormayan modern mavi çizgi
         
-        // BAŞLIK BİLGİLERİ
-        title: {
-            text: `${item.name.toUpperCase()} (30-DAY CHART)`,
-            align: 'left',
-            margin: 10,
-            style: { fontSize: '12px', fontWeight: 600, color: '#64748b', letterSpacing: '1px' }
+        // ÇİZGİ VE NOKTALAR (Kareli defterdeki gibi)
+        stroke: { curve: 'straight', width: 3 }, 
+        markers: {
+            size: 4, // Her günün verisine küçük bir nokta koyuyoruz ki imleçle üstüne gelmek kolay olsun
+            colors: ['#0d0e12'],
+            strokeColors: '#5b68df',
+            strokeWidth: 2,
+            hover: { size: 7 } // İmleç üstüne gelince nokta büyüsün
         },
-        subtitle: {
-            text: `$${item.price}`,
-            align: 'left',
-            margin: 25,
-            style: { fontSize: '36px', fontWeight: 700, color: '#ffffff' }
+        
+        dataLabels: { enabled: false }, // Ekranda kalabalık yapan sabit fiyat yazıları KAPALI
+
+        // SADE BAŞLIK
+        title: {
+            text: `${item.name.toUpperCase()} (30 Days)`,
+            align: 'center', // Başlığı tam ortaya aldık
+            margin: 20,
+            style: { fontSize: '18px', fontWeight: 600, color: '#ffffff', letterSpacing: '1px' }
         },
 
-        // NİŞANGAH (Crosshairs) ÖZELLİĞİ
+        // İMLEÇ (HOVER) KUTUCUĞU
         tooltip: {
             theme: 'dark',
-            x: { format: 'dd MMM yyyy' },
-            y: { formatter: (value) => `$${value.toFixed(2)}` }
+            x: { format: 'dd MMM yyyy' }, // İmleç tarihin üstüne gelince
+            y: { formatter: (value) => `$${value.toFixed(2)}` } // İmleç fiyatı göstersin
         },
 
-        // ALT EKSEN (Tarihler ve Nişangah Etiketi)
+        // YATAY EKSEN (Tarihler)
         xaxis: {
             type: 'datetime',
-            tooltip: {
-                enabled: true, // Fareyle üzerine gelince tarihi vurgula
-                formatter: function (val) {
-                    return new Date(val).toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
-                }
-            },
             labels: {
-                style: { colors: '#64748b', fontSize: '12px', fontFamily: 'Outfit' }
+                style: { colors: '#94a3b8', fontSize: '12px', fontFamily: 'Outfit' }
             },
-            axisBorder: { show: false },
-            axisTicks: { show: false }
+            axisBorder: { show: true, color: '#334155' }, // Alt eksen çizgisi belirgin
+            axisTicks: { show: true, color: '#334155' },
+            title: { text: 'DATES', style: { color: '#64748b', fontSize: '10px' } }
         },
 
-        // SAĞ EKSEN (Dinamik Fiyat Skalası ve Nişangah Etiketi)
+        // DİKEY EKSEN (Fiyatlar - SOL TARAFTA)
         yaxis: {
-            opposite: true, 
-            min: yAxisMin, // Dümdüz çizgiyi önleyen kritik zoom ayarı
+            opposite: false, // Borsacı stilinden çıkıp, klasik sola aldık
+            min: yAxisMin,
             max: yAxisMax,
-            tooltip: {
-                enabled: true // Fareyle üzerine gelince fiyatı vurgula
-            },
             labels: {
-                style: { colors: '#94a3b8', fontSize: '13px', fontFamily: 'Outfit', fontWeight: 500 },
+                style: { colors: '#94a3b8', fontSize: '13px', fontFamily: 'Outfit' },
                 formatter: (value) => `$${value.toFixed(1)}`
-            }
+            },
+            title: { text: 'PRICES', style: { color: '#64748b', fontSize: '10px' } }
         },
 
-        // KILAVUZ ÇİZGİLER (Tam bir hedef tahtası gibi)
+        // KARELİ DEFTER ÇİZGİLERİ
         grid: {
             show: true,
             borderColor: '#1e293b',
-            strokeDashArray: 3, 
-            xaxis: { lines: { show: true } }, // Dikey kılavuz çizgileri açtık
+            strokeDashArray: 0, // Noktalı değil, düz kareli defter çizgisi
+            xaxis: { lines: { show: true } }, 
             yaxis: { lines: { show: true } }, 
-            padding: { top: 10, right: 0, bottom: 0, left: 10 }
+            padding: { top: 10, right: 20, bottom: 0, left: 10 }
         }
     };
 
