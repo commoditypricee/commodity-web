@@ -210,7 +210,8 @@ function loadCustomApexChart(item) {
             strokeDashArray: 0, 
             xaxis: { lines: { show: true } }, 
             yaxis: { lines: { show: true } }, 
-            padding: { top: 10, right: 20, bottom: 0, left: 10 }
+            // BURADAKİ bottom: 0 DEĞERİNİ 25 YAPIYORUZ:
+            padding: { top: 10, right: 20, bottom: 25, left: 10 } 
         }
     };
 
