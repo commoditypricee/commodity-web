@@ -1,13 +1,11 @@
-// --- SAAT MOTURU (En üste aldık ki hiçbir hatadan etkilenmesin) ---
+// --- SAAT MOTURU ---
 function updateClock() {
     const now = new Date();
     
-    // Saat (00:00:00 formatı)
     const timeString = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const clockEl = document.getElementById('digital-clock');
     if(clockEl) clockEl.textContent = timeString;
     
-    // Tarih (Örn: 28 Mart 2026 formatı)
     const dateString = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
     const dateEl = document.getElementById('date');
     if(dateEl) dateEl.textContent = dateString;
@@ -15,7 +13,6 @@ function updateClock() {
 
 // Sayfa yüklendiğinde her şeyi başlat
 document.addEventListener("DOMContentLoaded", () => {
-    // Saati anında başlat ve her saniye tıkla
     updateClock();
     setInterval(updateClock, 1000);
 
@@ -31,6 +28,15 @@ const tvSymbols = {
     'HG=F': 'CAPITALCOM:COPPER',
     'BZ=F': 'OANDA:BCOUSD',
     'NG=F': 'OANDA:NATGASUSD'
+};
+
+// YAHOO'NUN KARMAŞIK İSİMLERİNİ TÜRKÇE VE SADE HALE GETİRİYORUZ
+const customNames = {
+    'GC=F': 'Altın (Ons)',
+    'SI=F': 'Gümüş',
+    'HG=F': 'Bakır',
+    'BZ=F': 'Brent Petrol',
+    'NG=F': 'Doğalgaz'
 };
 
 function loadTradingViewChart(symbol) {
@@ -74,13 +80,16 @@ async function fetchMarketData() {
             const colorClass = isPositive ? 'positive' : 'negative';
             const sign = isPositive ? '+' : '';
             const icon = icons[item.symbol] || '📊';
+            
+            // BURASI YENİ: Eğer sözlükte karşılığı varsa temiz ismi kullan, yoksa Yahoo'dan geleni yaz.
+            const cleanName = customNames[item.symbol] || item.name;
 
             const card = document.createElement('div');
             card.className = 'card';
             card.style.cursor = 'pointer'; 
             
             card.innerHTML = `
-                <h2>${icon} ${item.name}</h2>
+                <h2>${icon} ${cleanName}</h2>
                 <div class="price">$${item.price}</div>
                 <div class="change ${colorClass}">${sign}${item.changePercent}%</div>
             `;
