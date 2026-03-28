@@ -8,7 +8,7 @@
 }
 
 body {
-    background-color: #09090b; /* Tamamen koyu, göz yormayan profesyonel zemin */
+    background-color: #09090b; /* Koyu profesyonel zemin */
     color: #fafafa;
     font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
@@ -20,6 +20,7 @@ body {
     max-width: 1300px;
     margin: 0 auto;
     padding: 30px 20px;
+    width: 100%;
 }
 
 /* --- ÜST MENÜ VE LOGO --- */
@@ -43,7 +44,7 @@ body {
     color: #3b82f6; 
 }
 
-/* Saat Alanı (Sade ve Okunaklı) */
+/* Saat Alanı */
 .clock-pill {
     font-size: 15px; 
     color: #a1a1aa;
@@ -53,27 +54,25 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* --- ANA IZGARA (Kayma Sorununun Çözüldüğü Yer) --- */
+/* --- ANA IZGARA (KAYMAYI KÖKTEN ÇÖZEN KISIM BURASI) --- */
 .bento-grid {
     display: grid;
-    grid-template-columns: 2.5fr 1fr; /* Sol 2.5 kat, sağ 1 kat yer kaplar */
-    gap: 24px;
+    /* minmax(0, ...) komutu grafiğin kutuyu patlatmasını KESİN olarak engeller */
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); 
+    gap: 30px;
     align-items: start;
-}
-
-/* SİHİRLİ KOD: Grafiğin sağdaki kartları aşağı itmesini kesin olarak engeller */
-.bento-item, .cards-wrapper {
-    min-width: 0; 
+    width: 100%;
 }
 
 /* --- SOL: GRAFİK ALANI --- */
 .main-chart-wrapper {
     background: #0f0f11;
     border: 1px solid #27272a;
-    border-radius: 8px; /* Keskin köşeler, ciddiyet katar */
+    border-radius: 8px;
     padding: 24px;
     display: flex;
     flex-direction: column;
+    width: 100%; /* Kendi alanında %100 olsun, dışarı taşmasın */
 }
 
 .chart-header {
@@ -90,7 +89,7 @@ body {
     text-transform: uppercase;
 }
 
-/* Borsa Standardı Filtre Butonları */
+/* Filtre Butonları */
 .time-filters {
     display: flex;
     gap: 4px;
@@ -121,33 +120,55 @@ body {
     width: 100%;
 }
 
-/* --- SAĞ: EMTİA KARTLARI --- */
+/* --- SAĞ: EMTİA KARTLARI (ÇOK DAHA BELİRGİN VE ŞIK) --- */
 .cards-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
+    width: 100%;
 }
 
 .card {
-    background: #0f0f11;
+    /* Kartların rengini zeminden biraz daha açık yaparak belirginleştirdik */
+    background: #141417; 
     border: 1px solid #27272a;
     border-radius: 8px;
-    padding: 20px;
+    padding: 20px 24px;
     display: flex;
     justify-content: space-between; 
     align-items: center;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Kartların sol tarafına çok şık bir renkli çizgi (Vurgu) */
+.card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: #3f3f46; /* Pasifken gri */
+    transition: all 0.2s ease;
+}
+
+.card:hover::before {
+    background: #3b82f6; /* Üzerine gelince mavi olur */
 }
 
 .card:hover {
-    border-color: #52525b; /* Hafif çerçeve aydınlanması */
-    background: #18181b;
+    background: #1c1c21;
+    border-color: #3f3f46;
+    transform: translateX(4px); /* Tıklanma hissi için sağa hafif kayar */
 }
 
 .card-info h2 {
-    margin: 0 0 4px 0;
-    font-size: 13px;
+    margin: 0 0 6px 0;
+    font-size: 14px;
     color: #a1a1aa;
     font-weight: 600;
     text-transform: uppercase;
@@ -158,13 +179,13 @@ body {
     font-size: 24px;
     color: #ffffff;
     font-weight: 600;
-    font-variant-numeric: tabular-nums; /* Rakamların ekranda titremesini engeller */
+    font-variant-numeric: tabular-nums;
 }
 
 /* Yüzde Rozetleri */
 .badge {
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 6px 10px;
+    border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
 }
@@ -172,14 +193,14 @@ body {
 .positive { background: rgba(16, 185, 129, 0.1); color: #10b981; }
 .negative { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
-/* Scrollbar (Kaydırma Çubuğu) Özelleştirmesi */
+/* Kaydırma Çubuğu */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #09090b; }
 ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
-/* Telefon Uyumları */
-@media (max-width: 1024px) {
+/* Telefon / Küçük Ekran Uyumu (Bozulma sınırını 850px'e çektik) */
+@media (max-width: 850px) {
     .bento-grid { grid-template-columns: 1fr; }
     .chart-header { flex-direction: column; gap: 15px; align-items: flex-start; }
     .time-filters { width: 100%; overflow-x: auto; }
