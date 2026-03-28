@@ -17,7 +17,6 @@ function updateClock() {
     if(clockEl) {
         const datePart = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         const timePart = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-        // Saat rengi yüksek kontrast yapıldı
         clockEl.innerHTML = `<span style="color: #475569;">${datePart}</span> <span style="color: #cbd5e1; margin: 0 10px;">|</span> <span style="color: #0f172a; font-weight: 800;">${timePart}</span>`;
     }
 }
@@ -208,8 +207,8 @@ function loadCustomApexChart(item) {
             toolbar: { show: false }, 
             animations: { enabled: true, easing: 'easeinout', speed: 200 } 
         },
-        colors: ['#2563eb'], // Daha koyu, daha okunabilir mavi 
-        stroke: { curve: 'smooth', width: 3 }, // Çizgi kalınlaştırıldı
+        colors: ['#2563eb'], 
+        stroke: { curve: 'smooth', width: 3 }, 
         
         fill: {
             type: 'gradient',
@@ -227,7 +226,7 @@ function loadCustomApexChart(item) {
             type: 'datetime',
             tickAmount: days >= 365 ? 5 : 6,
             labels: { 
-                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 700 }, // EKSEN YAZILARI KÖMÜR KARASI OLDU
+                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 700 }, 
                 datetimeUTC: false,
                 formatter: function(val) {
                     if (!val) return '';
@@ -237,21 +236,26 @@ function loadCustomApexChart(item) {
                     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 }
             },
-            axisBorder: { show: true, color: '#e2e8f0' }, 
-            axisTicks: { show: true, color: '#e2e8f0' }
+            axisBorder: { show: true, color: '#cbd5e1' }, // Eksen sınırı belirginleştirildi
+            axisTicks: { show: true, color: '#cbd5e1' }
         },
         yaxis: {
             opposite: false, 
             min: minPrice - (minPrice * 0.002),
             max: maxPrice + (maxPrice * 0.002),
             labels: {
-                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 700 }, // Y EKSENİ OKUNABİLİR
+                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 700 }, 
                 formatter: (value) => `$${value.toFixed(2)}`
             }
         },
+        // İŞTE YENİ BELİRGİN KILAVUZ ÇİZGİLER (GRID)
         grid: {
-            show: true, borderColor: '#e2e8f0', strokeDashArray: 4, 
-            xaxis: { lines: { show: true } }, yaxis: { lines: { show: true } }, 
+            show: true, 
+            borderColor: '#cbd5e1', // Çok daha koyu ve doygun bir gri
+            strokeDashArray: 3, // Kesikler küçültüldü, çizgi daha devamlı görünecek
+            position: 'back',
+            xaxis: { lines: { show: true } }, // Dikey çizgileri de net açtık
+            yaxis: { lines: { show: true } }, 
             padding: { top: 10, right: 20, bottom: 20, left: 10 }
         }
     };
@@ -280,7 +284,6 @@ async function fetchMarketData(isFirstLoad = false) {
             const isPos = parseFloat(item.changePercent) >= 0;
             const sign = isPos ? '+' : '';
 
-            // YENİ ICON-BOX TASARIMI
             card.innerHTML = `
                 <div class="card-info">
                     <div class="icon-box">${getEmojiIcon(item.name)}</div>
