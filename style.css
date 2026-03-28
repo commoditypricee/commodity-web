@@ -9,7 +9,6 @@ body {
     color: #ffffff;
     font-family: 'Outfit', sans-serif;
     margin: 0;
-    /* DÜZELTME: Fixed height (100vh) ve overflow: hidden kaldırıldı, standart kaydırma (scrolling) izin verildi. */
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
 }
@@ -36,25 +35,27 @@ body {
 }
 .logo span { color: #3b82f6; }
 
+/* SAAT TASARIMI GÜNCELLENDİ (Daha büyük ve profesyonel) */
 .clock-pill {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 10px 24px;
-    border-radius: 50px;
-    font-size: 15px;
-    color: #94a3b8;
+    background: rgba(19, 21, 27, 0.8);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    padding: 12px 24px;
+    border-radius: 12px; 
+    font-size: 18px; 
+    color: #e2e8f0;
     font-weight: 500;
     backdrop-filter: blur(12px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    letter-spacing: 0.5px;
 }
 
 /* --- ANA YAPI (Bento Grid) --- */
 .bento-grid {
     display: grid;
-    grid-template-columns: 2.2fr 1fr; /* Sol tarafa biraz daha nefes aldırdık */
+    grid-template-columns: 2.2fr 1fr; 
     gap: 30px;
-    /* DÜZELTME: Fixed height (calc(...)) ve min-height kaldırıldı.
-       Bunun yerine, içeriğin boyutuna göre esnemesi için height: auto yapıldı ve en az viewport yüksekliği kadar olması sağlandı. */
     height: auto;
     min-height: calc(100vh - 180px);
 }
@@ -70,10 +71,8 @@ body {
     padding: 30px;
     box-shadow: 0 24px 40px rgba(0, 0, 0, 0.4);
     position: relative;
-    /* DÜZELTME: overflow: hidden kaldırıldı. Artık alttaki saatler/tarihler gizlenmeyecek. */
 }
 
-/* Grafik arkasına çok hafif bir glow */
 .main-chart-wrapper::before {
     content: '';
     position: absolute;
@@ -101,9 +100,9 @@ body {
     color: #f8fafc;
     font-weight: 600;
     letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
-/* Apple Tarzı Kapsül Butonlar - Pürüzsüzleştirildi */
 .time-filters {
     display: flex;
     background: rgba(0, 0, 0, 0.2);
@@ -144,12 +143,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    /* DÜZELTME: height: 100% ve overflow-y: auto kaldırıldı. Artık tüm sayfa kayacak, sadece kartlar değil. */
     height: auto;
     padding-right: 10px;
 }
 
-/* Klasik çirkin scrollbar yerine zarif bir çizgi (Anasayfada genel scrollbar için) */
 body::-webkit-scrollbar { width: 6px; }
 body::-webkit-scrollbar-track { background: transparent; }
 body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
@@ -166,10 +163,9 @@ body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
     justify-content: space-between; 
     align-items: center;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Yaylanma efekti */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
 }
 
-/* Kartların üzerine gelinceki efsane Hover efekti */
 .card:hover {
     border-color: rgba(59, 130, 246, 0.4);
     transform: translateY(-6px); 
@@ -205,7 +201,6 @@ body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
     transition: all 0.3s ease;
 }
 
-/* Neon renkler ve ince parlama efektleri */
 .positive { 
     background: rgba(34, 197, 94, 0.1); 
     color: #4ade80; 
@@ -220,7 +215,6 @@ body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
     box-shadow: 0 0 10px rgba(239, 68, 68, 0.05);
 }
 
-/* TELEFONLAR İÇİN ALT ALTA DİZİLİM (Uyumlu) */
 @media (max-width: 1024px) {
     .dashboard-wrapper { padding: 20px; }
     .bento-grid { grid-template-columns: 1fr; height: auto; }
