@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 body {
-    /* Simsiyah değil, merkezden dışa doğru yayılan ultra koyu bir uzay grisi */
     background: radial-gradient(circle at top, #16181f 0%, #000000 100%);
     color: #ffffff;
     font-family: 'Outfit', sans-serif;
@@ -16,7 +15,7 @@ body {
     padding: 30px;
 }
 
-/* --- ÜST NAVİGASYON --- */
+/* --- NAVİGASYON --- */
 .top-nav {
     display: flex;
     justify-content: space-between;
@@ -24,15 +23,8 @@ body {
     margin-bottom: 30px;
 }
 
-.logo {
-    font-size: 26px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-}
-
-.logo span {
-    color: #3b82f6; /* Modern Kraliyet Mavisi */
-}
+.logo { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+.logo span { color: #3b82f6; }
 
 .clock-pill {
     background: rgba(255, 255, 255, 0.03);
@@ -45,33 +37,33 @@ body {
     backdrop-filter: blur(10px);
 }
 
-/* --- BENTO BOX MİMARİSİ (Grid) --- */
+/* --- ANA YAPI (Bento Grid) --- */
 .bento-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 2fr 1fr; /* Sol 2 parça, Sağ 1 parça */
     gap: 24px;
     height: calc(100vh - 150px);
     min-height: 600px;
 }
 
-/* --- YENİ NESİL GRAFİK KARTI (Sol Taraf) --- */
+/* --- SOL: GRAFİK ALANI --- */
 .main-chart-wrapper {
     background: #0d0e12;
     border-radius: 24px;
     border: 1px solid #222634;
     display: flex;
     flex-direction: column;
-    padding: 24px; /* Kartın içine nefes alma boşluğu eklendi */
+    padding: 24px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
 
-/* YENİ: Başlık ve Butonların Yan Yana Durduğu Bölüm */
 .chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #1a1d27;
     padding-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 #chart-title {
@@ -82,10 +74,10 @@ body {
     letter-spacing: 1px;
 }
 
-/* YENİ: Apple Tarzı Kapsül Butonlar */
+/* Apple Tarzı Kapsül Butonlar */
 .time-filters {
     display: flex;
-    background: #16181f; /* Kapsül Arka Planı */
+    background: #16181f;
     border-radius: 12px;
     padding: 4px;
     border: 1px solid #222634;
@@ -95,7 +87,7 @@ body {
     background: transparent;
     border: none;
     color: #64748b;
-    padding: 8px 16px;
+    padding: 8px 14px;
     border-radius: 8px;
     font-family: 'Outfit', sans-serif;
     font-size: 13px;
@@ -104,11 +96,8 @@ body {
     transition: all 0.2s ease-in-out;
 }
 
-.time-btn:hover {
-    color: #ffffff;
-}
+.time-btn:hover { color: #ffffff; }
 
-/* Seçili olan butonun modern mavi gölgesi ve rengi */
 .time-btn.active {
     background: #3b82f6; 
     color: #ffffff;
@@ -118,10 +107,9 @@ body {
 .main-chart {
     flex-grow: 1;
     min-height: 400px;
-    margin-top: 10px;
 }
 
-/* --- SAĞ TARAF: FİYAT KARTLARI --- */
+/* --- SAĞ: KARTLAR ALANI --- */
 .cards-wrapper {
     display: flex;
     flex-direction: column;
@@ -131,7 +119,6 @@ body {
     padding-right: 5px;
 }
 
-/* Sağ panelin kaydırma çubuğunu görünmez yaptık */
 .cards-wrapper::-webkit-scrollbar { width: 0; }
 
 .card {
@@ -143,10 +130,9 @@ body {
     justify-content: space-between; 
     align-items: center;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
 }
 
-/* Kartın üstüne gelince Mavi parlama efekti */
 .card:hover {
     border-color: #3b82f6;
     transform: translateX(-5px); 
@@ -168,11 +154,8 @@ body {
     letter-spacing: -1px;
 }
 
-.card-status {
-    text-align: right;
-}
+.card-status { text-align: right; }
 
-/* Yüzdelik Oranlar (Badge) */
 .badge {
     padding: 6px 12px;
     border-radius: 12px;
@@ -183,12 +166,10 @@ body {
 .positive { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
 .negative { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
-/* --- TELEFON VE TABLET UYUMU --- */
+/* TELEFONLAR İÇİN ALT ALTA DİZİLİM */
 @media (max-width: 1024px) {
     .bento-grid { grid-template-columns: 1fr; height: auto; }
-    .main-chart { height: 450px; }
-    
-    /* Mobilde başlık ve butonlar alt alta daha güzel durur */
     .chart-header { flex-direction: column; gap: 15px; align-items: flex-start; }
     .time-filters { flex-wrap: wrap; }
+    .main-chart { height: 400px; }
 }
