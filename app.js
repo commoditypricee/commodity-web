@@ -80,6 +80,7 @@ function applyTimeFilter(days, timeframeText) {
         if (currentItemIntraday && currentItemIntraday.length > 0) {
             filteredData = currentItemIntraday; 
         } else {
+            console.warn("Saatlik veri henüz JSON'da yok! GitHub Botunun çalışması bekleniyor.");
             const lastDate = currentItemHistory[currentItemHistory.length - 1].x;
             const cutoffDate = lastDate - (24 * 60 * 60 * 1000);
             filteredData = currentItemHistory.filter(item => item.x >= cutoffDate);
@@ -99,12 +100,19 @@ function applyTimeFilter(days, timeframeText) {
 
     mainApexChart.updateSeries([{ data: filteredData }]);
     
-    // EKSENLERİ GÜNCELLEME (En temiz ve hatasız yöntem)
+    // EKSENİ ZORLA GÜNCELLE (Bu sefer kaçış yok)
     mainApexChart.updateOptions({
         xaxis: {
-            tickAmount: 6, // Ekranda tam 6 tane tarih/saat çizgisi çıkar
+            tickAmount: 6, // Ekranda tam 6 tane tarih/saat çizgisi çıkacak
             labels: {
-                format: isIntraday ? 'HH:mm' : 'dd MMM' // 1 günse saat, değilse gün/ay yaz (Apex'in kendi motoru)
+                formatter: function(val) {
+                    if (!val) return '';
+                    const date = new Date(val);
+                    if (isIntraday) {
+                        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    }
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                }
             }
         },
         yaxis: {
@@ -161,7 +169,8 @@ function loadCustomApexChart(item) {
     const options = {
         series: [{ name: 'Price', data: filteredData }],
         chart: {
-            type: 'line', 
+            // GRAFİK TÜRÜNÜ 'area' OLARAK DEĞİŞTİRDİK (Gölge ekler)
+            type: 'area', 
             height: '100%',
             width: '100%',
             background: 'transparent', 
@@ -172,6 +181,17 @@ function loadCustomApexChart(item) {
         colors: ['#3b82f6'], 
         stroke: { curve: 'straight', width: 2 }, 
         
+        // GÖLGE AYARLARI (Area Chart Fill)
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.3, // Üstte hafif şeffaf
+                opacityTo: 0.05,  // Altta neredeyse görünmez
+                stops: [0, 90, 100]
+            }
+        },
+
         markers: { size: 0, hover: { size: 6 } }, 
         dataLabels: { enabled: false }, 
 
@@ -183,11 +203,19 @@ function loadCustomApexChart(item) {
 
         xaxis: {
             type: 'datetime',
-            tickAmount: 6, // Her zaman ekseni 6 eşit parçaya böl
+            // GRAFİK İLK YÜKLENDİĞİNDE DE EKSENİ ZORLA BÖL
+            tickAmount: 6,
             labels: { 
                 style: { colors: '#94a3b8', fontSize: '12px', fontFamily: 'Outfit' },
                 datetimeUTC: false,
-                format: isIntraday ? 'HH:mm' : 'dd MMM' // Sadece yerleşik formati kullan
+                formatter: function(val) {
+                    if (!val) return '';
+                    const date = new Date(val);
+                    if (isIntraday) {
+                        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    }
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                }
             },
             axisBorder: { show: true, color: '#334155' }, 
             axisTicks: { show: true, color: '#334155' },
@@ -210,15 +238,15 @@ function loadCustomApexChart(item) {
             strokeDashArray: 0, 
             xaxis: { lines: { show: true } }, 
             yaxis: { lines: { show: true } }, 
-            // BURADAKİ bottom: 0 DEĞERİNİ 25 YAPIYORUZ:
-            padding: { top: 10, right: 20, bottom: 25, left: 10 } 
+            // ALTTAN BOŞLUĞU 50 YAPTIK (Eksen sığsın diye)
+            padding: { top: 10, right: 20, bottom: 50, left: 10 }
         }
     };
 
     mainApexChart = new ApexCharts(container, options);
     mainApexChart.render();
 }
-// Alt kısım fetchMarketData aynı kaldı...
+
 async function fetchMarketData(isFirstLoad = false) {
     const container = document.getElementById('market-data');
     try {
