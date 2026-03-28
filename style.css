@@ -1,18 +1,68 @@
-/* --- YENİ NESİL GRAFİK KARTI TASARIMI --- */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+body {
+    /* Simsiyah değil, merkezden dışa doğru yayılan ultra koyu bir uzay grisi */
+    background: radial-gradient(circle at top, #16181f 0%, #000000 100%);
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    margin: 0;
+    height: 100vh;
+    overflow-x: hidden;
+}
+
+.dashboard-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+/* --- ÜST NAVİGASYON --- */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.logo span {
+    color: #3b82f6; /* Modern Kraliyet Mavisi */
+}
+
+.clock-pill {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 14px;
+    color: #a1a9bb;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+}
+
+/* --- BENTO BOX MİMARİSİ (Grid) --- */
+.bento-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    height: calc(100vh - 150px);
+    min-height: 600px;
+}
+
+/* --- YENİ NESİL GRAFİK KARTI (Sol Taraf) --- */
 .main-chart-wrapper {
     background: #0d0e12;
     border-radius: 24px;
     border: 1px solid #222634;
     display: flex;
     flex-direction: column;
-    padding: 24px; /* Kartın içine nefes alma boşluğu ekledik */
+    padding: 24px; /* Kartın içine nefes alma boşluğu eklendi */
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-}
-
-.main-chart {
-    flex-grow: 1;
-    min-height: 400px;
-    margin-top: 10px;
 }
 
 /* YENİ: Başlık ve Butonların Yan Yana Durduğu Bölüm */
@@ -63,4 +113,82 @@
     background: #3b82f6; 
     color: #ffffff;
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.main-chart {
+    flex-grow: 1;
+    min-height: 400px;
+    margin-top: 10px;
+}
+
+/* --- SAĞ TARAF: FİYAT KARTLARI --- */
+.cards-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Sağ panelin kaydırma çubuğunu görünmez yaptık */
+.cards-wrapper::-webkit-scrollbar { width: 0; }
+
+.card {
+    background: linear-gradient(145deg, #13151b, #0d0e12);
+    border: 1px solid #222634;
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Kartın üstüne gelince Mavi parlama efekti */
+.card:hover {
+    border-color: #3b82f6;
+    transform: translateX(-5px); 
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1);
+}
+
+.card-info h2 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    color: #8b92a5;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.card-info .price {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.card-status {
+    text-align: right;
+}
+
+/* Yüzdelik Oranlar (Badge) */
+.badge {
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.positive { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.negative { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+/* --- TELEFON VE TABLET UYUMU --- */
+@media (max-width: 1024px) {
+    .bento-grid { grid-template-columns: 1fr; height: auto; }
+    .main-chart { height: 450px; }
+    
+    /* Mobilde başlık ve butonlar alt alta daha güzel durur */
+    .chart-header { flex-direction: column; gap: 15px; align-items: flex-start; }
+    .time-filters { flex-wrap: wrap; }
 }
