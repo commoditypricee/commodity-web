@@ -3,35 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commodity Terminal Pro</title>
+    <title>Canlı Piyasa Ekranı</title>
     <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
 
     <div class="top-panel">
         <div class="brand">
-            <span class="logo">🥇</span>
-            <h1>Commodity<span class="pro-tag">Terminal PRO</span></h1>
+            <span class="logo">📈</span>
+            <h1>Canlı Piyasa</h1>
         </div>
         
         <div class="live-info">
             <div id="date" class="date-display">...</div>
-            <div id="digital-clock" class="clock-display">00:00:00</div>
+            <div id="digital-clock" class="clock-display">--:--:--</div>
             <div class="status-indicator">
                 <span class="pulse-dot"></span>
-                <span>SYSTEM LIVE</span>
+                <span>SİSTEM CANLI</span>
             </div>
         </div>
     </div>
 
-    <div id="chart-container" class="chart-glass">
-        </div>
-
     <div id="market-data" class="grid-container">
         </div>
 
+    <div id="chart-container" class="chart-glass">
+        </div>
+
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-    
-    <script src="app.js?v=2"></script>
+    <script src="app.js?v=3"></script> 
 </body>
 </html>
