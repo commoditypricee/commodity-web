@@ -17,16 +17,20 @@
         <main class="bento-grid">
             
             <div class="bento-item main-chart-wrapper">
-                <div class="main-chart" id="chart-container"></div>
                 
-                <div class="chart-toolbar">
-                    <button class="time-btn" data-range="1W">1W</button>
-                    <button class="time-btn active" data-range="1M">1M</button>
-                    <button class="time-btn" data-range="3M">3M</button>
-                    <button class="time-btn" data-range="6M">6M</button>
-                    <button class="time-btn" data-range="1Y">1Y</button>
-                    <button class="time-btn" data-range="5Y">5Y</button>
+                <div class="chart-header">
+                    <h2 id="chart-title">GOLD (1 Month)</h2>
+                    <div class="time-filters">
+                        <button class="time-btn" data-days="7">1 Week</button>
+                        <button class="time-btn active" data-days="30">1 Month</button>
+                        <button class="time-btn" data-days="90">3 Months</button>
+                        <button class="time-btn" data-days="180">6 Months</button>
+                        <button class="time-btn" data-days="365">1 Year</button>
+                        <button class="time-btn" data-days="1825">5 Years</button>
+                    </div>
                 </div>
+
+                <div class="main-chart" id="chart-container"></div>
             </div>
 
             <div class="cards-wrapper" id="market-data"></div>
@@ -35,6 +39,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script src="app.js?v=99"></script> 
+    <script src="app.js?v=200"></script> 
 </body>
 </html>
