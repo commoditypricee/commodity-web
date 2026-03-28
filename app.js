@@ -1,14 +1,12 @@
-// --- SAAT MOTURU ---
+// --- YENİ NESİL SAAT KAPSÜLÜ ---
 function updateClock() {
     const now = new Date();
+    // Örn: "Mar 28 • 16:07" formatı (Çok daha estetik)
+    const dateString = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
     
-    const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-    const clockEl = document.getElementById('digital-clock');
-    if(clockEl) clockEl.textContent = timeString;
-    
-    const dateString = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-    const dateEl = document.getElementById('date');
-    if(dateEl) dateEl.textContent = dateString.toUpperCase();
+    const clockEl = document.getElementById('clock');
+    if(clockEl) clockEl.textContent = `${dateString} • ${timeString}`;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -50,16 +48,16 @@ function loadTradingViewChart(symbol) {
             "style": "2",
             "locale": "en",
             "enable_publishing": false,
-            // Grafik arka planını yeni tasarımımızın rengine uyumlu yaptık
-            "backgroundColor": "#111827", 
-            "gridColor": "#1F2937",
+            // Yeni ultra koyu arka plan rengimizle eşleştirdik
+            "backgroundColor": "#0d0e12", 
+            "gridColor": "#1a1d27",
             "hide_top_toolbar": false,
             "hide_legend": false,
             "save_image": false,
             "container_id": "chart-container"
         });
     } else {
-        container.innerHTML = '<p style="color:#94A3B8; text-align:center; padding-top:200px;">Chart could not be loaded.</p>';
+        container.innerHTML = '<p style="color:#8b92a5; text-align:center; padding-top:200px;">Chart is blocked by browser.</p>';
     }
 }
 
@@ -75,24 +73,27 @@ async function fetchMarketData() {
             const isPositive = parseFloat(item.changePercent) >= 0;
             const colorClass = isPositive ? 'positive' : 'negative';
             const sign = isPositive ? '+' : '';
-            
             const cleanName = customNames[item.symbol] || item.name;
 
             const card = document.createElement('div');
             card.className = 'card';
             
-            // EMOJİLER SİLİNDİ, TERTEMİZ HTML
+            // YENİ ASİMETRİK KART İÇERİĞİ
             card.innerHTML = `
-                <h2>${cleanName}</h2>
-                <div class="price">$${item.price}</div>
-                <div class="change ${colorClass}">${sign}${item.changePercent}%</div>
+                <div class="card-info">
+                    <h2>${cleanName}</h2>
+                    <div class="price">$${item.price}</div>
+                </div>
+                <div class="card-status">
+                    <div class="badge ${colorClass}">${sign}${item.changePercent}%</div>
+                </div>
             `;
             
             card.addEventListener('click', () => {
                 loadTradingViewChart(item.symbol);
-                // Yeni tasarıma uygun çok hafif, şık bir tıklama efekti
-                card.style.transform = 'translateY(2px)';
-                setTimeout(() => card.style.transform = 'translateY(0)', 150);
+                // Menü efekti için tıklanınca çok hafif küçülme
+                card.style.transform = 'scale(0.98)';
+                setTimeout(() => card.style.transform = 'translateX(-5px)', 150);
             });
 
             container.appendChild(card);
