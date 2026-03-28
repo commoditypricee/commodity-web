@@ -6,7 +6,7 @@ function updateClock() {
 
 let mainApexChart = null; 
 let currentItemHistory = []; 
-let currentSymbolName = 'GOLD'; // Başlık için isim hafızası
+let currentSymbolName = 'GOLD'; 
 
 document.addEventListener("DOMContentLoaded", () => {
     updateClock();
@@ -14,68 +14,60 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchMarketData(true); 
     setInterval(() => fetchMarketData(false), 60000); 
     
-    // YENİ BUTON TIKLAMA OLAYI (Kusursuz Kesim Mantığı)
+    // BUTONLARA TIKLAMA (Veri Kesme Mantığı)
     document.querySelectorAll('.time-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            // Aktif butonu değiştir
             document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             
-            // Kaç günlük veri istediğini ve buton ismini al
             const days = parseInt(e.target.getAttribute('data-days'));
             const text = e.target.textContent;
-            
             applyTimeFilter(days, text);
         });
     });
 });
 
-// YENİ: VERİYİ GÜN SAYISINA GÖRE KESİP GRAFİĞİ GÜNCELLEME (Asla Çökmez)
+// VERİYİ BUTONA GÖRE KES VE YENİDEN ÇİZ
 function applyTimeFilter(days, timeframeText) {
     if (!mainApexChart || currentItemHistory.length === 0) return;
 
-    // Hedeflenen tarihi bul
     const lastDate = currentItemHistory[currentItemHistory.length - 1].x;
     const cutoffDate = lastDate - (days * 24 * 60 * 60 * 1000);
 
-    // İstenilen tarihten sonrasını kesip al
     const filteredData = currentItemHistory.filter(item => item.x >= cutoffDate);
+    
+    if(filteredData.length === 0) return;
 
-    // Yeni çizim için en alt ve en üst fiyatı bul (Y eksenini ayarlamak için)
     const prices = filteredData.map(h => h.y);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
 
-    // 1. Grafiğin verisini güncelle (Animasyonlu)
+    // Grafiği animasyonla güncelle
     mainApexChart.updateSeries([{ data: filteredData }]);
     
-    // 2. Grafiğin fiyat eksenini (Y ekseni) yeni verilere göre otomatik sıkıştır!
+    // Y eksenini (fiyatı) yeni grafiğe göre uydur
     mainApexChart.updateOptions({
         yaxis: {
-            min: minPrice - (minPrice * 0.01),
-            max: maxPrice + (maxPrice * 0.01)
+            min: minPrice - (minPrice * 0.005),
+            max: maxPrice + (maxPrice * 0.005)
         }
     });
 
-    // 3. Başlığı güncelle (Örn: "GOLD (1 Month)")
     document.getElementById('chart-title').textContent = `${currentSymbolName.toUpperCase()} (${timeframeText})`;
 }
 
-// SADE, TEK RENK ÇİZGİ GRAFİĞİ BAŞLANGICI
+// SADE ÇİZGİ GRAFİĞİ (Fiyatlar Solda)
 function loadCustomApexChart(item) {
     const container = document.getElementById('chart-container');
     currentItemHistory = item.history; 
     currentSymbolName = item.name;
     
-    // İlk açılışta hangi buton aktifse ona göre veriyi kes (Örn: 1 Month -> 30 gün)
     const activeBtn = document.querySelector('.time-btn.active');
     const days = activeBtn ? parseInt(activeBtn.getAttribute('data-days')) : 30;
     const btnText = activeBtn ? activeBtn.textContent : '1 Month';
 
-    // Başlığı ekle
     document.getElementById('chart-title').textContent = `${item.name.toUpperCase()} (${btnText})`;
 
-    // İlk veriyi kes
     const lastDate = currentItemHistory[currentItemHistory.length - 1].x;
     const cutoffDate = lastDate - (days * 24 * 60 * 60 * 1000);
     const filteredData = currentItemHistory.filter(h => h.x >= cutoffDate);
@@ -89,15 +81,15 @@ function loadCustomApexChart(item) {
     const options = {
         series: [{ name: 'Price', data: filteredData }],
         chart: {
-            type: 'line',
+            type: 'line', // SADE ÇİZGİ
             height: '100%',
             width: '100%',
             background: 'transparent', 
             fontFamily: 'Outfit, sans-serif',
             toolbar: { show: false }, 
-            animations: { enabled: true, easing: 'easeinout', speed: 400 } // Artık kasmadan animasyon yapabilir
+            animations: { enabled: true, easing: 'easeinout', speed: 400 } 
         },
-        colors: ['#3b82f6'], // Kraliyet Mavisi
+        colors: ['#3b82f6'], 
         stroke: { curve: 'straight', width: 2 }, 
         
         markers: { size: 0, hover: { size: 6 } }, 
@@ -117,10 +109,11 @@ function loadCustomApexChart(item) {
             tooltip: { enabled: false }
         },
 
+        // FİYATLAR SOL TARAFTA
         yaxis: {
             opposite: false, 
-            min: minPrice - (minPrice * 0.01),
-            max: maxPrice + (maxPrice * 0.01),
+            min: minPrice - (minPrice * 0.005),
+            max: maxPrice + (maxPrice * 0.005),
             labels: {
                 style: { colors: '#94a3b8', fontSize: '13px', fontFamily: 'Outfit' },
                 formatter: (value) => `$${value.toFixed(1)}`
