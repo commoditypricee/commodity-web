@@ -1,10 +1,16 @@
-// EMTİA SİMGELERİ (Düzeltme 1)
-const icons = {
-    'GOLD': 'image_1.png', 
-    'SILVER': 'image_3.png', 
-    'CRUDE OIL': 'image_5.png', 
-    'COPPER': 'image_7.png',
-    // data.json'daki tam ada göre burayı güncelleyebilirsin, bunlar profesyonel simgeler.
+// DOSYA İSMİ YERİNE DİREKT EMOJİLER (Garantili Çözüm)
+const getEmojiIcon = (name) => {
+    const n = name.toUpperCase();
+    if (n.includes('GOLD')) return '🥇';
+    if (n.includes('SILVER')) return '🥈';
+    if (n.includes('OIL') || n.includes('BRENT') || n.includes('WTI')) return '🛢️';
+    if (n.includes('COPPER')) return '🥉';
+    if (n.includes('GAS')) return '💨';
+    if (n.includes('WHEAT') || n.includes('CORN')) return '🌾';
+    if (n.includes('COFFEE')) return '☕';
+    if (n.includes('SUGAR')) return '🧊';
+    if (n.includes('PLATINUM') || n.includes('PALLADIUM')) return '💍';
+    return '📊'; // Hiçbiri değilse standart borsa emojisi
 };
 
 function updateClock() {
@@ -35,15 +41,66 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.classList.add('active');
             
             const days = parseInt(btn.getAttribute('data-days'));
-            const text = btn.textContent;
-            
             if (isNaN(days)) return;
 
-            applyTimeFilter(days, text);
+            applyTimeFilter(days);
             updateCardPercentages(days); 
         });
     });
 });
+
+// YENİ: İlgili emtianın farklı zaman dilimlerindeki performansını hesaplayan tablo motoru
+function renderPerformanceTable(item) {
+    const container = document.getElementById('perf-stats');
+    if (!container) return;
+
+    const periods = [
+        { label: '1 Day', days: 1 },
+        { label: '1 Week', days: 7 },
+        { label: '1 Month', days: 30 },
+        { label: '1 Year', days: 365 },
+        { label: '5 Years', days: 1825 }
+    ];
+
+    let html = '';
+    const history = item.history || [];
+
+    periods.forEach(p => {
+        let changePercent = 0;
+        
+        if (p.days === 1) {
+             changePercent = parseFloat(item.changePercent);
+        } else if (history.length > 0) {
+            const lastData = history[history.length - 1];
+            const currentPrice = lastData.y;
+            const lastDate = lastData.x;
+            const cutoffDate = lastDate - (p.days * 24 * 60 * 60 * 1000);
+
+            const filteredData = history.filter(h => h.x >= cutoffDate);
+            if (filteredData.length > 0) {
+                const startPrice = filteredData[0].y;
+                changePercent = ((currentPrice - startPrice) / startPrice) * 100;
+            } else {
+                // Eğer yeterli geçmiş veri yoksa eldeki en eski veriyi baz al
+                const startPrice = history[0].y;
+                changePercent = ((currentPrice - startPrice) / startPrice) * 100;
+            }
+        }
+
+        const isPos = changePercent >= 0;
+        const color = isPos ? '#10b981' : '#ef4444';
+        const sign = isPos ? '+' : '';
+
+        html += `
+            <div class="stat-box">
+                <div class="stat-label">${p.label}</div>
+                <div class="stat-value" style="color: ${color}">${sign}${changePercent.toFixed(2)}%</div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
 
 function updateCardPercentages(days) {
     if (!globalMarketData || globalMarketData.length === 0) return;
@@ -82,15 +139,12 @@ function updateCardPercentages(days) {
     });
 }
 
-// BAŞLIK FORMATI DÜZELTME (Düzeltme 2 & 3: CamelCase, Parantez Yok)
-function getPriceTitle(name, isFirstLoad = false) {
+function getPriceTitle(name) {
     const camelName = name.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-    // İlk harfler büyük, PRICE ibaresi eklendi, parantezli timeframe kaldırıldı.
-    // Eğer data.json'da 'CRUDE OIL' varsa 'Crude Oil Price' olacak.
     return `${camelName} Price`; 
 }
 
-function applyTimeFilter(days, timeframeText) {
+function applyTimeFilter(days) {
     if (!mainApexChart) return;
 
     let filteredData = [];
@@ -143,7 +197,6 @@ function applyTimeFilter(days, timeframeText) {
         }
     });
 
-    // Başlık Formatı Uygulandı
     document.getElementById('chart-title').textContent = getPriceTitle(currentSymbolName);
 }
 
@@ -157,8 +210,10 @@ function loadCustomApexChart(item) {
     const days = activeBtn ? parseInt(activeBtn.getAttribute('data-days')) : 1;
     const isLongTerm = (days >= 365);
 
-    // Başlık Formatı İlk Yüklemede Uygulandı
     document.getElementById('chart-title').textContent = getPriceTitle(item.name);
+
+    // Her tıklamada tabloyu ilgili emtiaya göre yeniden oluştur
+    renderPerformanceTable(item);
 
     let filteredData = [];
 
@@ -187,7 +242,7 @@ function loadCustomApexChart(item) {
     const options = {
         series: [{ name: 'Price', data: filteredData }],
         chart: {
-            type: 'area', // Beyaz temada Area (Gölge) klas durur
+            type: 'area',
             height: '100%',
             width: '100%',
             background: 'transparent', 
@@ -196,15 +251,12 @@ function loadCustomApexChart(item) {
             animations: { enabled: true, easing: 'easeinout', speed: 300 } 
         },
         colors: ['#3b82f6'], 
-        stroke: { curve: 'smooth', width: 2 }, // Yumuşak çizgi modern gösterir
+        stroke: { curve: 'smooth', width: 2 },
         
         fill: {
             type: 'gradient',
             gradient: {
-                shadeIntensity: 1,
-                opacityFrom: 0.2, 
-                opacityTo: 0.0,  
-                stops: [0, 90, 100]
+                shadeIntensity: 1, opacityFrom: 0.2, opacityTo: 0.0, stops: [0, 90, 100]
             }
         },
 
@@ -212,7 +264,7 @@ function loadCustomApexChart(item) {
         dataLabels: { enabled: false }, 
 
         tooltip: {
-            theme: 'dark', // Tooltip dark kalsın, okunabilirliği daha iyi
+            theme: 'dark',
             x: { format: days === 1 ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }, 
             y: { formatter: (value) => `$${value.toFixed(2)}` },
             style: { fontSize: '13px', fontFamily: 'Inter' }
@@ -252,11 +304,8 @@ function loadCustomApexChart(item) {
         },
 
         grid: {
-            show: true,
-            borderColor: '#e2e8f0', // Beyaz temaya uygun grid çizgileri
-            strokeDashArray: 4, 
-            xaxis: { lines: { show: true } }, 
-            yaxis: { lines: { show: true } }, 
+            show: true, borderColor: '#e2e8f0', strokeDashArray: 4, 
+            xaxis: { lines: { show: true } }, yaxis: { lines: { show: true } }, 
             padding: { top: 10, right: 20, bottom: 20, left: 10 }
         }
     };
@@ -265,16 +314,16 @@ function loadCustomApexChart(item) {
     mainApexChart.render();
 }
 
-// Kartlara simgeleri basan fonksiyon
 function getCardHtml(item) {
-    const iconPath = icons[item.name] || 'default-commodity.png'; // data.json'da 'CRUDE OIL' varsa, blackbarrel.png'yi bulur.
+    const iconEmoji = getEmojiIcon(item.name); // Simge olarak emojiyi çağır
     const isPositive = parseFloat(item.changePercent) >= 0;
     const colorClass = isPositive ? 'positive' : 'negative';
     const sign = isPositive ? '+' : '';
 
     return `
         <div class="card-info">
-            <i class="commodity-icon"><img src="${iconPath}" alt="${item.name}" style="width:24px; height:24px;"></i> <div class="commodity-details">
+            <i class="commodity-icon">${iconEmoji}</i>
+            <div class="commodity-details">
                 <h2>${item.name}</h2>
                 <div class="price">$${item.price}</div>
             </div>
@@ -305,7 +354,7 @@ async function fetchMarketData(isFirstLoad = false) {
                 setTimeout(() => loadCustomApexChart(item), 100);
             }
 
-            card.innerHTML = getCardHtml(item); // Simgeli kart HTML'i basıldı
+            card.innerHTML = getCardHtml(item); 
             
             card.addEventListener('click', () => {
                 loadCustomApexChart(item); 
