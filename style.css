@@ -3,9 +3,8 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    /* EKRAN ARKA PLANI HAFİF GRİ, KUTULAR BEYAZ OLACAK (Derinlik katar) */
-    background-color: #f1f5f9; 
-    color: #0f172a; /* Çok koyu lacivert/siyah (Okunabilirlik zirvesi) */
+    background-color: #ffffff; 
+    color: #111827; 
     font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -16,91 +15,118 @@ body {
 
 .top-nav {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 30px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;
+    margin-bottom: 30px; border-bottom: 1px solid #e5e7eb; padding-bottom: 20px;
 }
 
-.logo { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #0f172a; }
-.logo span { color: #2563eb; } /* Daha koyu canlı bir mavi */
+.logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: #111827; }
+.logo span { color: #3b82f6; }
 
-.clock-pill { font-size: 16px; color: #334155; font-weight: 600; display: flex; align-items: center; background: #ffffff; padding: 6px 14px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.clock-pill { font-size: 16px; color: #4b5563; font-weight: 500; display: flex; align-items: center; }
 
 .bento-grid {
     display: grid; grid-template-columns: minmax(0, 7.5fr) minmax(0, 2.5fr); 
     gap: 30px; align-items: start; width: 100%;
 }
 
-/* GRAFİK KUTUSUNA GÖLGE VE SAF BEYAZ ZEMİN */
 .main-chart-wrapper {
     background: #ffffff; 
-    border: 1px solid #e2e8f0; 
-    border-radius: 12px;
+    border: 1px solid #e5e7eb; 
+    border-radius: 8px;
     padding: 30px; 
     display: block; 
     width: 100%;
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);
 }
 
-.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-#chart-title { font-size: 22px; color: #0f172a; font-weight: 800; text-transform: uppercase; letter-spacing: -0.5px; }
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+#chart-title { font-size: 20px; color: #111827; font-weight: 700; }
 
-.time-filters { display: flex; gap: 4px; background: #f8fafc; padding: 6px; border-radius: 8px; border: 1px solid #e2e8f0; }
+.time-filters { display: flex; gap: 4px; background: #f3f4f6; padding: 4px; border-radius: 6px; }
 .time-btn {
-    background: transparent; border: none; color: #475569;
-    padding: 8px 16px; border-radius: 6px; font-family: 'Inter', sans-serif;
-    font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    background: transparent; border: none; color: #4b5563;
+    padding: 6px 14px; border-radius: 4px; font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s;
 }
-.time-btn:hover { color: #0f172a; }
-.time-btn.active { background: #ffffff; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+.time-btn:hover { color: #111827; }
+.time-btn.active { background: #ffffff; color: #111827; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
 
-.chart-box { height: 400px; width: 100%; margin-bottom: 40px; position: relative; }
-.main-chart { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+/* İŞTE GRAFİĞİ TABLODAN KOPARAN KISIM */
+.chart-box {
+    height: 400px;
+    width: 100%;
+    margin-bottom: 30px; 
+    padding-bottom: 20px;
+    border-bottom: 2px dashed #e5e7eb; /* Grafiğin bittiğini gösteren ayırıcı çizgi */
+    position: relative;
+}
 
-/* BİREBİR GOLDPRICE TABLOSU (NETLEŞTİRİLDİ) */
-.performance-stats { width: 100%; }
-.gp-title { font-size: 16px; font-weight: 800; color: #0f172a; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+.main-chart { position: absolute; top: 0; left: 0; right: 0; bottom: 20px; }
 
-.gp-simple-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-.gp-simple-table th { color: #475569; font-weight: 700; padding: 12px 0; border-bottom: 2px solid #e2e8f0; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
-.gp-simple-table td { color: #0f172a; padding: 16px 0; border-bottom: 1px solid #e2e8f0; font-weight: 700; }
-.gp-simple-table tr:last-child td { border-bottom: none; }
+/* === KÜÇÜLTÜLMÜŞ KOMPAKT TABLO TASARIMI === */
+.performance-stats { 
+    width: 100%; 
+    max-width: 600px; /* Tabloyu grafikten daha küçük (dar) yaptık */
+    margin: 0 auto; /* Tam ortaya hizaladık */
+    background: #fafafa; /* Grafikten ayırmak için çok hafif gri zemin */
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px 30px;
+}
 
-.left { text-align: left; } .right { text-align: right; }
-.gp-pos { color: #059669 !important; } /* Daha koyu, okunabilir yeşil */
-.gp-neg { color: #dc2626 !important; } /* Daha koyu, okunabilir kırmızı */
+.gp-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #4b5563;
+    margin-bottom: 12px;
+    text-align: center; /* Başlığı ortaladık */
+    letter-spacing: 0.5px;
+}
 
-/* SAĞ KARTLAR (ARTIK MÜKEMMEL OKUNUYOR) */
-.cards-wrapper { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+.gp-simple-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.gp-simple-table th {
+    color: #6b7280;
+    font-weight: 600;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.gp-simple-table td {
+    color: #111827;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 600;
+}
+
+.gp-simple-table tr:last-child td { border-bottom: none; padding-bottom: 0; }
+
+.left { text-align: left; }
+.right { text-align: right; }
+.gp-pos { color: #10b981 !important; }
+.gp-neg { color: #ef4444 !important; }
+
+/* SAĞ KARTLAR */
+.cards-wrapper { display: flex; flex-direction: column; gap: 12px; width: 100%; }
 
 .card {
-    background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;
+    background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px;
     padding: 16px 20px; display: flex; justify-content: space-between; 
     align-items: center; cursor: pointer; transition: all 0.2s ease;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); /* Kartlara derinlik */
 }
-.card:hover { border-color: #94a3b8; transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+.card:hover { border-color: #9ca3af; background: #f9fafb; }
 
-.card-info { display: flex; align-items: center; gap: 16px; }
+.card-info { display: flex; align-items: center; gap: 12px; }
+.commodity-icon { font-size: 26px; font-style: normal; line-height: 1; }
 
-/* SİMGELERİ BELİRGİNLEŞTİREN YENİ KUTU YAPI */
-.icon-box {
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 22px;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-}
+.card-info .commodity-details h2 { margin: 0 0 2px 0; font-size: 13px; color: #4b5563; font-weight: 600; }
+.card-info .commodity-details .price { font-size: 20px; color: #111827; font-weight: 700; font-variant-numeric: tabular-nums; }
 
-.card-info .commodity-details h2 { margin: 0 0 4px 0; font-size: 14px; color: #475569; font-weight: 700; letter-spacing: 0.5px; }
-.card-info .commodity-details .price { font-size: 24px; color: #0f172a; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.5px; }
-
-.badge { padding: 6px 10px; border-radius: 6px; font-size: 14px; font-weight: 700; }
-.positive { background: #d1fae5; color: #059669; border: 1px solid #a7f3d0; }
-.negative { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.badge { padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: 600; }
+.positive { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.negative { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 
 @media (max-width: 1024px) {
     .bento-grid { grid-template-columns: 1fr; }
