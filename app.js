@@ -45,6 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+// MATEMATİK HATASI ÇÖZÜLEN TABLO MOTORU
 function renderGoldPriceTable(item) {
     const container = document.getElementById('perf-stats');
     if (!container) return;
@@ -64,21 +65,27 @@ function renderGoldPriceTable(item) {
         let changePercent = 0;
         let changeAmount = 0;
         
-        if (p.days === 1) {
-             changePercent = parseFloat(item.changePercent);
-             const currentPrice = history.length > 0 ? history[history.length-1].y : item.price;
-             changeAmount = currentPrice - (currentPrice / (1 + (changePercent/100)));
-        } else if (history.length > 0) {
-            const lastData = history[history.length - 1];
+        // 1 Günlük (Today) hesaplamasını doğrudan gün içi veri (intraday) dizisinden okuyoruz
+        let sourceData = (p.days === 1 && item.intraday && item.intraday.length > 0) ? item.intraday : history;
+
+        if (sourceData && sourceData.length > 0) {
+            const lastData = sourceData[sourceData.length - 1];
             const currentPrice = lastData.y;
             const cutoffDate = lastData.x - (p.days * 24 * 60 * 60 * 1000);
-            const filteredData = history.filter(h => h.x >= cutoffDate);
             
-            let startPrice = history[0].y;
-            if (filteredData.length > 0) startPrice = filteredData[0].y;
+            const filteredData = sourceData.filter(h => h.x >= cutoffDate);
+            
+            let startPrice = sourceData[0].y;
+            if (filteredData.length > 0) {
+                startPrice = filteredData[0].y;
+            }
             
             changeAmount = currentPrice - startPrice;
             changePercent = (changeAmount / startPrice) * 100;
+        } else if (p.days === 1) {
+            // Veri yoksa data.json fallback
+            changePercent = parseFloat(item.changePercent) || 0;
+            changeAmount = item.price - (item.price / (1 + (changePercent/100)));
         }
 
         const isPos = changePercent >= 0;
@@ -172,6 +179,10 @@ function applyTimeFilter(days) {
                 style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 600 },
                 formatter: (value) => `$${value.toFixed(2)}`
             }
+        },
+        tooltip: {
+            // İmleç X eksen formatını seçime göre günceller
+            x: { format: isIntraday ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }
         }
     });
 }
@@ -224,7 +235,11 @@ function loadCustomApexChart(item) {
         },
         markers: { size: 0, hover: { size: 6 } }, 
         dataLabels: { enabled: false }, 
+        
+        // MIKNATIS GİBİ ÇALIŞAN İMLEÇ AYARLARI BURADA (shared & intersect)
         tooltip: {
+            shared: true,
+            intersect: false,
             theme: 'light',
             x: { format: days === 1 ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }, 
             y: { formatter: (value) => `$${value.toFixed(2)}` },
