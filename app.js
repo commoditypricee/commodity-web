@@ -21,27 +21,35 @@ function updateClock() {
     }
 }
 
-// === YENİ: GRAFİKTEKİ ÖLÜ BÖLGELERİ DOLDURAN MOTOR ===
-// İki veri noktası arasındaki boş saatleri her 15 dakikada bir otomatik fiyatlandırır.
-function interpolateData(data) {
+// === YENİ: GERÇEK BORSA GÖRÜNÜMÜ VEREN AKILLI VOLATİLİTE (DALGALANMA) MOTORU ===
+// İki veri noktası arasındaki dümdüz boşluğu, mikro dalgalanmalar (noise) yaratarak pürüzsüz ve gerçekçi bir grafiğe çevirir.
+function interpolateWithVolatility(data) {
     if (!data || data.length < 2) return data;
     let result = [];
+    
     for (let i = 0; i < data.length - 1; i++) {
         let p1 = data[i];
         let p2 = data[i+1];
         result.push(p1);
         
         let timeDiff = p2.x - p1.x;
-        let interval = 15 * 60 * 1000; // 15 Dakika
+        let interval = 10 * 60 * 1000; // Her 10 dakikada bir veri noktası üretir
         let steps = Math.floor(timeDiff / interval);
         
         if (steps > 1) {
             let timeStep = timeDiff / steps;
             let priceStep = (p2.y - p1.y) / steps;
+            
             for (let j = 1; j < steps; j++) {
+                // Temel doğrusal çizgi (cetvel çizgisi)
+                let basePrice = p1.y + (priceStep * j);
+                
+                // Gerçekçilik katan mikro borsa dalgalanması (Fiyatın %0.03'ü kadar aşağı/yukarı titreme)
+                let volatilityNoise = (Math.random() - 0.5) * (basePrice * 0.0006); 
+                
                 result.push({
                     x: p1.x + (timeStep * j),
-                    y: parseFloat((p1.y + (priceStep * j)).toFixed(2))
+                    y: parseFloat((basePrice + volatilityNoise).toFixed(2))
                 });
             }
         }
@@ -93,6 +101,7 @@ function renderGoldPriceTable(item) {
         let changePercent = 0;
         let changeAmount = 0;
         
+        // Tablo verisi her zaman orijinal ve net olmalı (Interpolasyon uygulanmadan çekilir)
         let sourceData = (p.days === 1 && item.intraday && item.intraday.length > 0) ? item.intraday : history;
 
         if (sourceData && sourceData.length > 0) {
@@ -172,8 +181,8 @@ function applyTimeFilter(days) {
     
     if (isIntraday) {
         let rawData = (currentItemIntraday && currentItemIntraday.length > 0) ? currentItemIntraday : currentItemHistory.filter(item => item.x >= (currentItemHistory[currentItemHistory.length - 1].x - 86400000));
-        // Günlük grafiği pürüzsüz yapmak için boşlukları dolduruyoruz
-        filteredData = interpolateData(rawData);
+        // Günlük grafiği dümdüz çizgi olmaktan kurtaran volatilite fonksiyonu eklendi
+        filteredData = interpolateWithVolatility(rawData);
     } else {
         if(currentItemHistory.length === 0) return;
         filteredData = currentItemHistory.filter(item => item.x >= (currentItemHistory[currentItemHistory.length - 1].x - (days * 86400000)));
@@ -210,7 +219,6 @@ function applyTimeFilter(days) {
         },
         tooltip: {
             x: {
-                // EKSİK GÜNLER DÜZELTİLDİ: Artık 1 yıllık grafikte bile tam Gün/Ay/Yıl gösterecek
                 formatter: function(val) {
                     const date = new Date(val);
                     const dayMonthYear = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -242,8 +250,8 @@ function loadCustomApexChart(item) {
     let filteredData = [];
     if (isIntraday) {
         let rawData = (currentItemIntraday && currentItemIntraday.length > 0) ? currentItemIntraday : currentItemHistory.filter(h => h.x >= (currentItemHistory[currentItemHistory.length - 1].x - 86400000));
-        // Günlük grafiği pürüzsüz yapmak için boşlukları dolduruyoruz
-        filteredData = interpolateData(rawData);
+        // Günlük grafiği gerçek borsa dalgalanmasına çeviren fonksiyon
+        filteredData = interpolateWithVolatility(rawData);
     } else {
         filteredData = currentItemHistory.filter(h => h.x >= (currentItemHistory[currentItemHistory.length - 1].x - (days * 86400000)));
     }
@@ -286,7 +294,6 @@ function loadCustomApexChart(item) {
             intersect: false,
             theme: 'light',
             x: {
-                // EKSİK GÜNLER DÜZELTİLDİ
                 formatter: function(val) {
                     const date = new Date(val);
                     const dayMonthYear = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
