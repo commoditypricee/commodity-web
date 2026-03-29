@@ -2,12 +2,9 @@ const getEmojiIcon = (name) => {
     const n = name.toUpperCase();
     if (n.includes('GOLD')) return '🥇';
     if (n.includes('SILVER')) return '🥈';
-    if (n.includes('OIL') || n.includes('BRENT') || n.includes('WTI')) return '🛢️';
+    if (n.includes('BRENT')) return '🛢️';
     if (n.includes('COPPER')) return '🥉';
     if (n.includes('GAS')) return '💨';
-    if (n.includes('WHEAT') || n.includes('CORN')) return '🌾';
-    if (n.includes('COFFEE')) return '☕';
-    if (n.includes('SUGAR')) return '🧊';
     return '📊';
 };
 
@@ -16,46 +13,9 @@ function updateClock() {
     const clockEl = document.getElementById('clock');
     if(clockEl) {
         const datePart = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        const timePart = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+        const timePart = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
         clockEl.innerHTML = `<span style="color: #475569;">${datePart}</span> <span style="color: #cbd5e1; margin: 0 10px;">|</span> <span style="color: #0f172a; font-weight: 800;">${timePart}</span>`;
     }
-}
-
-// === YENİ: GERÇEK BORSA GÖRÜNÜMÜ VEREN AKILLI VOLATİLİTE (DALGALANMA) MOTORU ===
-// İki veri noktası arasındaki dümdüz boşluğu, mikro dalgalanmalar (noise) yaratarak pürüzsüz ve gerçekçi bir grafiğe çevirir.
-function interpolateWithVolatility(data) {
-    if (!data || data.length < 2) return data;
-    let result = [];
-    
-    for (let i = 0; i < data.length - 1; i++) {
-        let p1 = data[i];
-        let p2 = data[i+1];
-        result.push(p1);
-        
-        let timeDiff = p2.x - p1.x;
-        let interval = 10 * 60 * 1000; // Her 10 dakikada bir veri noktası üretir
-        let steps = Math.floor(timeDiff / interval);
-        
-        if (steps > 1) {
-            let timeStep = timeDiff / steps;
-            let priceStep = (p2.y - p1.y) / steps;
-            
-            for (let j = 1; j < steps; j++) {
-                // Temel doğrusal çizgi (cetvel çizgisi)
-                let basePrice = p1.y + (priceStep * j);
-                
-                // Gerçekçilik katan mikro borsa dalgalanması (Fiyatın %0.03'ü kadar aşağı/yukarı titreme)
-                let volatilityNoise = (Math.random() - 0.5) * (basePrice * 0.0006); 
-                
-                result.push({
-                    x: p1.x + (timeStep * j),
-                    y: parseFloat((basePrice + volatilityNoise).toFixed(2))
-                });
-            }
-        }
-    }
-    result.push(data[data.length - 1]);
-    return result;
 }
 
 let mainApexChart = null; 
@@ -64,11 +24,40 @@ let currentItemIntraday = [];
 let currentSymbolName = 'GOLD'; 
 let globalMarketData = []; 
 
+// İki nokta arasını borsa dalgalanmasıyla dolduran algoritma
+function interpolateWithVolatility(data) {
+    if (!data || data.length < 2) return data;
+    let result = [];
+    for (let i = 0; i < data.length - 1; i++) {
+        let p1 = data[i];
+        let p2 = data[i+1];
+        result.push(p1);
+        let timeDiff = p2.x - p1.x;
+        let interval = 10 * 60 * 1000; 
+        let steps = Math.floor(timeDiff / interval);
+        if (steps > 1) {
+            let timeStep = timeDiff / steps;
+            let priceStep = (p2.y - p1.y) / steps;
+            for (let j = 1; j < steps; j++) {
+                let basePrice = p1.y + (priceStep * j);
+                let volatilityNoise = (Math.random() - 0.5) * (basePrice * 0.0006); 
+                result.push({ x: p1.x + (timeStep * j), y: parseFloat((basePrice + volatilityNoise).toFixed(2)) });
+            }
+        }
+    }
+    result.push(data[data.length - 1]);
+    return result;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     updateClock();
     setInterval(updateClock, 1000);
-    fetchMarketData(true); 
-    setInterval(() => fetchMarketData(false), 60000); 
+    
+    // Sadece ilk açılışta statik veriyi çek
+    fetchMarketData(true).then(() => {
+        // VERİ ÇEKİLDİKTEN SONRA CANLI AKIŞ SİMÜLASYONUNU BAŞLAT
+        startLiveTicker();
+    });
     
     document.querySelectorAll('.time-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -81,6 +70,60 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
+
+// === YENİ: CANLI VERİ AKIŞI (TICKER) MOTORU ===
+// Gerçek bir API bağlanana kadar terminalin canlı gibi akmasını sağlar
+function startLiveTicker() {
+    setInterval(() => {
+        const now = new Date().getTime();
+        
+        globalMarketData.forEach(item => {
+            // Gerçekçi mikro dalgalanma (%0.02 ile % -0.02 arası)
+            const changeFactor = 1 + ((Math.random() - 0.5) * 0.0004);
+            const oldPrice = item.price;
+            const newPrice = parseFloat((oldPrice * changeFactor).toFixed(2));
+            
+            item.price = newPrice;
+            
+            // Eğer 1 günlük grafikteysek yeni veriyi grafiğe canlı ekle
+            if (item.intraday && item.intraday.length > 0) {
+                item.intraday.push({ x: now, y: newPrice });
+                
+                // Çok fazla veri birikmesini engelle (Sadece son 24 saati tut)
+                if(item.intraday.length > 500) item.intraday.shift();
+            }
+
+            updateLiveUI(item.name, oldPrice, newPrice);
+        });
+
+        // Ortadaki büyük grafiği canlı olarak güncelle
+        const activeBtn = document.querySelector('.time-btn.active');
+        if (activeBtn && parseInt(activeBtn.getAttribute('data-days')) === 1) {
+            applyTimeFilter(1, true); 
+        }
+
+    }, 3000); // Her 3 saniyede bir yeni fiyat (Canlı Akış)
+}
+
+// === YENİ: CANLI UI GÜNCELLEYİCİ (FLAŞ EFEKTİ) ===
+function updateLiveUI(symbolName, oldPrice, newPrice) {
+    const card = document.querySelector(`.card[data-name="${symbolName}"]`);
+    if (!card) return;
+
+    const priceEl = card.querySelector('.price');
+    if (priceEl) {
+        priceEl.textContent = `$${newPrice.toFixed(2)}`;
+        
+        // Fiyat arttıysa yeşil, düştüyse kırmızı anlık parlama (Flash efekti)
+        const color = newPrice >= oldPrice ? '#10b981' : '#ef4444';
+        priceEl.style.color = color;
+        setTimeout(() => { priceEl.style.color = '#0f172a'; }, 500); // Yarım saniye sonra normale dön
+    }
+    
+    if (symbolName === currentSymbolName) {
+        renderGoldPriceTable(globalMarketData.find(i => i.name === symbolName));
+    }
+}
 
 function renderGoldPriceTable(item) {
     const container = document.getElementById('perf-stats');
@@ -101,7 +144,6 @@ function renderGoldPriceTable(item) {
         let changePercent = 0;
         let changeAmount = 0;
         
-        // Tablo verisi her zaman orijinal ve net olmalı (Interpolasyon uygulanmadan çekilir)
         let sourceData = (p.days === 1 && item.intraday && item.intraday.length > 0) ? item.intraday : history;
 
         if (sourceData && sourceData.length > 0) {
@@ -112,9 +154,7 @@ function renderGoldPriceTable(item) {
             const filteredData = sourceData.filter(h => h.x >= cutoffDate);
             
             let startPrice = sourceData[0].y;
-            if (filteredData.length > 0) {
-                startPrice = filteredData[0].y;
-            }
+            if (filteredData.length > 0) { startPrice = filteredData[0].y; }
             
             changeAmount = currentPrice - startPrice;
             changePercent = (changeAmount / startPrice) * 100;
@@ -136,10 +176,8 @@ function renderGoldPriceTable(item) {
         `;
     });
 
-    const title = `${item.name.toUpperCase()} PERFORMANCE (USD)`;
-
     container.innerHTML = `
-        <div class="gp-title">${title}</div>
+        <div class="gp-title">${item.name.toUpperCase()} PERFORMANCE (USD)</div>
         <table class="gp-simple-table">
             <thead>
                 <tr>
@@ -148,9 +186,7 @@ function renderGoldPriceTable(item) {
                     <th class="right">%</th>
                 </tr>
             </thead>
-            <tbody>
-                ${tbodyHtml}
-            </tbody>
+            <tbody>${tbodyHtml}</tbody>
         </table>
     `;
 }
@@ -174,26 +210,31 @@ function updateCardPercentages(days) {
     });
 }
 
-function applyTimeFilter(days) {
+function applyTimeFilter(days, isLiveUpdate = false) {
     if (!mainApexChart) return;
     let filteredData = [];
     let isIntraday = (days === 1);
     
     if (isIntraday) {
         let rawData = (currentItemIntraday && currentItemIntraday.length > 0) ? currentItemIntraday : currentItemHistory.filter(item => item.x >= (currentItemHistory[currentItemHistory.length - 1].x - 86400000));
-        // Günlük grafiği dümdüz çizgi olmaktan kurtaran volatilite fonksiyonu eklendi
-        filteredData = interpolateWithVolatility(rawData);
+        filteredData = isLiveUpdate ? rawData : interpolateWithVolatility(rawData);
     } else {
         if(currentItemHistory.length === 0) return;
         filteredData = currentItemHistory.filter(item => item.x >= (currentItemHistory[currentItemHistory.length - 1].x - (days * 86400000)));
     }
+    
     if(filteredData.length === 0) return;
 
     const prices = filteredData.map(h => h.y);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
 
-    mainApexChart.updateSeries([{ name: 'Price', data: filteredData }]);
+    // Animasyonu canlı akışta kapatıyoruz ki grafik titremesin
+    if (isLiveUpdate) {
+        mainApexChart.updateSeries([{ name: 'Price', data: filteredData }], false);
+    } else {
+        mainApexChart.updateSeries([{ name: 'Price', data: filteredData }]);
+    }
     
     mainApexChart.updateOptions({
         xaxis: {
@@ -222,9 +263,7 @@ function applyTimeFilter(days) {
                 formatter: function(val) {
                     const date = new Date(val);
                     const dayMonthYear = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-                    if (isIntraday) {
-                        return dayMonthYear + ', ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-                    }
+                    if (isIntraday) { return dayMonthYear + ', ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second:'2-digit', hour12: false }); }
                     return dayMonthYear;
                 }
             }
@@ -250,7 +289,6 @@ function loadCustomApexChart(item) {
     let filteredData = [];
     if (isIntraday) {
         let rawData = (currentItemIntraday && currentItemIntraday.length > 0) ? currentItemIntraday : currentItemHistory.filter(h => h.x >= (currentItemHistory[currentItemHistory.length - 1].x - 86400000));
-        // Günlük grafiği gerçek borsa dalgalanmasına çeviren fonksiyon
         filteredData = interpolateWithVolatility(rawData);
     } else {
         filteredData = currentItemHistory.filter(h => h.x >= (currentItemHistory[currentItemHistory.length - 1].x - (days * 86400000)));
@@ -272,23 +310,16 @@ function loadCustomApexChart(item) {
             background: 'transparent', 
             fontFamily: 'Inter, sans-serif',
             toolbar: { show: false }, 
-            animations: { enabled: true, easing: 'easeinout', speed: 200 } 
+            animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 1000 } } 
         },
         colors: ['#2563eb'], 
         stroke: { curve: 'smooth', width: 3 }, 
-        
         fill: {
             type: 'gradient',
             gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.0, stops: [0, 90, 100] }
         },
-        
-        markers: { 
-            size: 0, 
-            hover: { size: 6, colors: ['#ffffff'], strokeColors: '#2563eb', strokeWidth: 2 } 
-        }, 
-        
+        markers: { size: 0, hover: { size: 6, colors: ['#ffffff'], strokeColors: '#2563eb', strokeWidth: 2 } }, 
         dataLabels: { enabled: false }, 
-        
         tooltip: {
             shared: true,
             intersect: false,
@@ -297,9 +328,7 @@ function loadCustomApexChart(item) {
                 formatter: function(val) {
                     const date = new Date(val);
                     const dayMonthYear = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-                    if (isIntraday) {
-                        return dayMonthYear + ', ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-                    }
+                    if (isIntraday) { return dayMonthYear + ', ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }); }
                     return dayMonthYear;
                 }
             }, 
@@ -322,11 +351,7 @@ function loadCustomApexChart(item) {
             },
             axisBorder: { show: true, color: '#000000' }, 
             axisTicks: { show: true, color: '#000000' },
-            crosshairs: {
-                show: true,
-                position: 'back',
-                stroke: { color: '#64748b', width: 1, dashArray: 4 }
-            }
+            crosshairs: { show: true, position: 'back', stroke: { color: '#64748b', width: 1, dashArray: 4 } }
         },
         yaxis: {
             opposite: false, 
@@ -377,7 +402,7 @@ async function fetchMarketData(isFirstLoad = false) {
                     <div class="icon-box">${getEmojiIcon(item.name)}</div>
                     <div class="commodity-details">
                         <h2>${item.name}</h2>
-                        <div class="price">$${item.price}</div>
+                        <div class="price">$${item.price.toFixed(2)}</div>
                     </div>
                 </div>
                 <div class="card-status">
