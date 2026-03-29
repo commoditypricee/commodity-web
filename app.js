@@ -45,7 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// MATEMATİK HATASI ÇÖZÜLEN TABLO MOTORU
 function renderGoldPriceTable(item) {
     const container = document.getElementById('perf-stats');
     if (!container) return;
@@ -65,7 +64,6 @@ function renderGoldPriceTable(item) {
         let changePercent = 0;
         let changeAmount = 0;
         
-        // 1 Günlük (Today) hesaplamasını doğrudan gün içi veri (intraday) dizisinden okuyoruz
         let sourceData = (p.days === 1 && item.intraday && item.intraday.length > 0) ? item.intraday : history;
 
         if (sourceData && sourceData.length > 0) {
@@ -83,7 +81,6 @@ function renderGoldPriceTable(item) {
             changeAmount = currentPrice - startPrice;
             changePercent = (changeAmount / startPrice) * 100;
         } else if (p.days === 1) {
-            // Veri yoksa data.json fallback
             changePercent = parseFloat(item.changePercent) || 0;
             changeAmount = item.price - (item.price / (1 + (changePercent/100)));
         }
@@ -181,7 +178,6 @@ function applyTimeFilter(days) {
             }
         },
         tooltip: {
-            // İmleç X eksen formatını seçime göre günceller
             x: { format: isIntraday ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }
         }
     });
@@ -236,7 +232,6 @@ function loadCustomApexChart(item) {
         markers: { size: 0, hover: { size: 6 } }, 
         dataLabels: { enabled: false }, 
         
-        // MIKNATIS GİBİ ÇALIŞAN İMLEÇ AYARLARI BURADA (shared & intersect)
         tooltip: {
             shared: true,
             intersect: false,
@@ -259,8 +254,9 @@ function loadCustomApexChart(item) {
                     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 }
             },
-            axisBorder: { show: true, color: '#cbd5e1' }, 
-            axisTicks: { show: true, color: '#cbd5e1' }
+            // EKSEN ÇİZGİLERİ SİMSİYAH YAPILDI
+            axisBorder: { show: true, color: '#000000' }, 
+            axisTicks: { show: true, color: '#000000' }
         },
         yaxis: {
             opposite: false, 
@@ -273,8 +269,8 @@ function loadCustomApexChart(item) {
         },
         grid: {
             show: true, 
-            borderColor: '#cbd5e1', 
-            strokeDashArray: 3, 
+            borderColor: '#000000', // IZGARALAR ARTIK SİMSİYAH
+            strokeDashArray: 4,     // Biraz daha tok kesikler
             position: 'back',
             xaxis: { lines: { show: true } }, 
             yaxis: { lines: { show: true } }, 
