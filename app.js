@@ -229,7 +229,16 @@ function loadCustomApexChart(item) {
             type: 'gradient',
             gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.0, stops: [0, 90, 100] }
         },
-        markers: { size: 0, hover: { size: 6 } }, 
+        
+        // VERİ NOKTALARINI GÖRÜNÜR YAPAN KISIM (İmleç sorununun çözümü)
+        markers: { 
+            size: 4, 
+            colors: ['#ffffff'], 
+            strokeColors: '#2563eb', 
+            strokeWidth: 2, 
+            hover: { size: 7 } 
+        }, 
+        
         dataLabels: { enabled: false }, 
         
         tooltip: {
@@ -254,9 +263,15 @@ function loadCustomApexChart(item) {
                     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 }
             },
-            // EKSEN ÇİZGİLERİ SİMSİYAH YAPILDI
             axisBorder: { show: true, color: '#000000' }, 
-            axisTicks: { show: true, color: '#000000' }
+            axisTicks: { show: true, color: '#000000' },
+            // İMLECİ TAKİP EDEN DİKEY ÇİZGİ
+            crosshairs: {
+                show: true,
+                position: 'back',
+                stroke: { color: '#64748b', width: 1, dashArray: 4 }
+            },
+            tooltip: { enabled: true } // X ekseninde saati gösteren ekstra balon
         },
         yaxis: {
             opposite: false, 
@@ -269,8 +284,8 @@ function loadCustomApexChart(item) {
         },
         grid: {
             show: true, 
-            borderColor: '#000000', // IZGARALAR ARTIK SİMSİYAH
-            strokeDashArray: 4,     // Biraz daha tok kesikler
+            borderColor: '#000000', 
+            strokeDashArray: 4, 
             position: 'back',
             xaxis: { lines: { show: true } }, 
             yaxis: { lines: { show: true } }, 
