@@ -230,17 +230,15 @@ function loadCustomApexChart(item) {
             gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.0, stops: [0, 90, 100] }
         },
         
-        // VERİ NOKTALARINI GÖRÜNÜR YAPAN KISIM (İmleç sorununun çözümü)
+        // BONCUKLAR TAMAMEN GÖRÜNMEZ YAPILDI
         markers: { 
-            size: 4, 
-            colors: ['#ffffff'], 
-            strokeColors: '#2563eb', 
-            strokeWidth: 2, 
-            hover: { size: 7 } 
+            size: 0, 
+            hover: { size: 6, colors: ['#ffffff'], strokeColors: '#2563eb', strokeWidth: 2 } 
         }, 
         
         dataLabels: { enabled: false }, 
         
+        // MIKNATIS GİBİ ÇALIŞAN İMLEÇ AYARLARI (shared & intersect)
         tooltip: {
             shared: true,
             intersect: false,
@@ -265,13 +263,11 @@ function loadCustomApexChart(item) {
             },
             axisBorder: { show: true, color: '#000000' }, 
             axisTicks: { show: true, color: '#000000' },
-            // İMLECİ TAKİP EDEN DİKEY ÇİZGİ
             crosshairs: {
                 show: true,
                 position: 'back',
                 stroke: { color: '#64748b', width: 1, dashArray: 4 }
-            },
-            tooltip: { enabled: true } // X ekseninde saati gösteren ekstra balon
+            }
         },
         yaxis: {
             opposite: false, 
