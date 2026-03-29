@@ -94,14 +94,14 @@ function renderGoldPriceTable(item) {
         `;
     });
 
-    const title = `${item.name.toUpperCase()} PRICE PERFORMANCE USD`;
+    const title = `${item.name.toUpperCase()} PERFORMANCE (USD)`;
 
     container.innerHTML = `
         <div class="gp-title">${title}</div>
         <table class="gp-simple-table">
             <thead>
                 <tr>
-                    <th class="left">Change</th>
+                    <th class="left">Period</th>
                     <th class="right">Amount</th>
                     <th class="right">%</th>
                 </tr>
@@ -151,12 +151,11 @@ function applyTimeFilter(days) {
 
     mainApexChart.updateSeries([{ name: 'Price', data: filteredData }]);
     
-    // GÜNCELLEMEDE BİLE FONT STİLİNİ (KİLİDİNİ) KORUYAN ALAN BURASI
     mainApexChart.updateOptions({
         xaxis: {
             tickAmount: days >= 365 ? 5 : 6,
             labels: {
-                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 600 }, // Stil korundu
+                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 600 }, 
                 formatter: function(val) {
                     if (!val) return '';
                     const date = new Date(val);
@@ -170,7 +169,7 @@ function applyTimeFilter(days) {
             min: minPrice - (minPrice * 0.002), 
             max: maxPrice + (maxPrice * 0.002),
             labels: {
-                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 600 }, // Stil korundu
+                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 600 },
                 formatter: (value) => `$${value.toFixed(2)}`
             }
         }
