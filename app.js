@@ -21,6 +21,35 @@ function updateClock() {
     }
 }
 
+// === YENİ: GRAFİKTEKİ ÖLÜ BÖLGELERİ DOLDURAN MOTOR ===
+// İki veri noktası arasındaki boş saatleri her 15 dakikada bir otomatik fiyatlandırır.
+function interpolateData(data) {
+    if (!data || data.length < 2) return data;
+    let result = [];
+    for (let i = 0; i < data.length - 1; i++) {
+        let p1 = data[i];
+        let p2 = data[i+1];
+        result.push(p1);
+        
+        let timeDiff = p2.x - p1.x;
+        let interval = 15 * 60 * 1000; // 15 Dakika
+        let steps = Math.floor(timeDiff / interval);
+        
+        if (steps > 1) {
+            let timeStep = timeDiff / steps;
+            let priceStep = (p2.y - p1.y) / steps;
+            for (let j = 1; j < steps; j++) {
+                result.push({
+                    x: p1.x + (timeStep * j),
+                    y: parseFloat((p1.y + (priceStep * j)).toFixed(2))
+                });
+            }
+        }
+    }
+    result.push(data[data.length - 1]);
+    return result;
+}
+
 let mainApexChart = null; 
 let currentItemHistory = []; 
 let currentItemIntraday = []; 
@@ -142,7 +171,9 @@ function applyTimeFilter(days) {
     let isIntraday = (days === 1);
     
     if (isIntraday) {
-        filteredData = (currentItemIntraday && currentItemIntraday.length > 0) ? currentItemIntraday : currentItemHistory.filter(item => item.x >= (currentItemHistory[currentItemHistory.length - 1].x - 86400000));
+        let rawData = (currentItemIntraday && currentItemIntraday.length > 0) ? currentItemIntraday : currentItemHistory.filter(item => item.x >= (currentItemHistory[currentItemHistory.length - 1].x - 86400000));
+        // Günlük grafiği pürüzsüz yapmak için boşlukları dolduruyoruz
+        filteredData = interpolateData(rawData);
     } else {
         if(currentItemHistory.length === 0) return;
         filteredData = currentItemHistory.filter(item => item.x >= (currentItemHistory[currentItemHistory.length - 1].x - (days * 86400000)));
@@ -178,7 +209,17 @@ function applyTimeFilter(days) {
             }
         },
         tooltip: {
-            x: { format: isIntraday ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }
+            x: {
+                // EKSİK GÜNLER DÜZELTİLDİ: Artık 1 yıllık grafikte bile tam Gün/Ay/Yıl gösterecek
+                formatter: function(val) {
+                    const date = new Date(val);
+                    const dayMonthYear = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                    if (isIntraday) {
+                        return dayMonthYear + ', ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    }
+                    return dayMonthYear;
+                }
+            }
         }
     });
 }
@@ -191,6 +232,7 @@ function loadCustomApexChart(item) {
     
     const activeBtn = document.querySelector('.time-btn.active');
     const days = activeBtn ? parseInt(activeBtn.getAttribute('data-days')) : 1;
+    const isIntraday = (days === 1);
     
     const camelName = item.name.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
     document.getElementById('chart-title').textContent = `${camelName} Price`;
@@ -198,8 +240,10 @@ function loadCustomApexChart(item) {
     renderGoldPriceTable(item);
 
     let filteredData = [];
-    if (days === 1) {
-        filteredData = (currentItemIntraday && currentItemIntraday.length > 0) ? currentItemIntraday : currentItemHistory.filter(h => h.x >= (currentItemHistory[currentItemHistory.length - 1].x - 86400000));
+    if (isIntraday) {
+        let rawData = (currentItemIntraday && currentItemIntraday.length > 0) ? currentItemIntraday : currentItemHistory.filter(h => h.x >= (currentItemHistory[currentItemHistory.length - 1].x - 86400000));
+        // Günlük grafiği pürüzsüz yapmak için boşlukları dolduruyoruz
+        filteredData = interpolateData(rawData);
     } else {
         filteredData = currentItemHistory.filter(h => h.x >= (currentItemHistory[currentItemHistory.length - 1].x - (days * 86400000)));
     }
@@ -230,7 +274,6 @@ function loadCustomApexChart(item) {
             gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.0, stops: [0, 90, 100] }
         },
         
-        // BONCUKLAR TAMAMEN GÖRÜNMEZ YAPILDI
         markers: { 
             size: 0, 
             hover: { size: 6, colors: ['#ffffff'], strokeColors: '#2563eb', strokeWidth: 2 } 
@@ -238,12 +281,21 @@ function loadCustomApexChart(item) {
         
         dataLabels: { enabled: false }, 
         
-        // MIKNATIS GİBİ ÇALIŞAN İMLEÇ AYARLARI (shared & intersect)
         tooltip: {
             shared: true,
             intersect: false,
             theme: 'light',
-            x: { format: days === 1 ? 'dd MMM, HH:mm' : 'dd MMM yyyy' }, 
+            x: {
+                // EKSİK GÜNLER DÜZELTİLDİ
+                formatter: function(val) {
+                    const date = new Date(val);
+                    const dayMonthYear = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+                    if (isIntraday) {
+                        return dayMonthYear + ', ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    }
+                    return dayMonthYear;
+                }
+            }, 
             y: { formatter: (value) => `$${value.toFixed(2)}` },
             style: { fontSize: '14px', fontFamily: 'Inter', fontWeight: 500 }
         },
