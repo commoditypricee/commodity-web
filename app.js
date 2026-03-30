@@ -1,3 +1,6 @@
+// === DİKKAT: AŞAĞIDAKİ TIRNAKLARIN İÇİNE FMP SİTESİNDEN ALDIĞIN API ŞİFRENİ YAPIŞTIR ===
+const API_KEY = "86Nedf4EOs5jHyEMnpZR3eXTeRfhSZhu"; 
+
 const getEmojiIcon = (name) => {
     const n = name.toUpperCase();
     if (n.includes('GOLD')) return '🥇';
@@ -6,6 +9,15 @@ const getEmojiIcon = (name) => {
     if (n.includes('COPPER')) return '🥉';
     if (n.includes('GAS')) return '💨';
     return '📊';
+};
+
+// JSON'daki emtia isimlerini, Yahoo Finance/FMP borsa kodlarına (TICKER) eşleştiren sözlük
+const symbolMap = {
+    "GOLD": "GC=F",
+    "SILVER": "SI=F",
+    "BRENT OIL": "BZ=F",
+    "NATURAL GAS": "NG=F",
+    "COPPER": "HG=F"
 };
 
 function updateClock() {
@@ -18,13 +30,7 @@ function updateClock() {
     }
 }
 
-let mainApexChart = null; 
-let currentItemHistory = []; 
-let currentItemIntraday = []; 
-let currentSymbolName = 'GOLD'; 
-let globalMarketData = []; 
-
-// İki nokta arasını borsa dalgalanmasıyla dolduran algoritma
+// === BOŞLUKLARI DOLDURAN AKILLI BORSA DALGALANMA ALGORİTMASI ===
 function interpolateWithVolatility(data) {
     if (!data || data.length < 2) return data;
     let result = [];
@@ -49,14 +55,26 @@ function interpolateWithVolatility(data) {
     return result;
 }
 
+let mainApexChart = null; 
+let currentItemHistory = []; 
+let currentItemIntraday = []; 
+let currentSymbolName = 'GOLD'; 
+let globalMarketData = []; 
+
 document.addEventListener("DOMContentLoaded", () => {
     updateClock();
     setInterval(updateClock, 1000);
     
-    // Sadece ilk açılışta statik veriyi çek
+    // 1. Önce grafiğin iskeletini (geçmiş verileri) JSON'dan çiz
     fetchMarketData(true).then(() => {
-        // VERİ ÇEKİLDİKTEN SONRA CANLI AKIŞ SİMÜLASYONUNU BAŞLAT
+        // 2. İskelet çizilince hemen GERÇEK API'ye bağlanıp anlık fiyatı güncelle
+        fetchRealLivePrices();
+        
+        // 3. Her 3 saniyede bir ekranı canlandıran simülatörü çalıştır (Gerçek fiyata çapalıdır)
         startLiveTicker();
+        
+        // 4. Her 5 dakikada bir API kotasını yakmadan gerçek piyasa fiyatını kontrol et
+        setInterval(fetchRealLivePrices, 300000);
     });
     
     document.querySelectorAll('.time-btn').forEach(btn => {
@@ -71,53 +89,97 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// === YENİ: CANLI VERİ AKIŞI (TICKER) MOTORU ===
-// Gerçek bir API bağlanana kadar terminalin canlı gibi akmasını sağlar
+// === YENİ: GERÇEK ZAMANLI API BAĞLANTISI (PİYASA FİYATINI ÇEKER) ===
+async function fetchRealLivePrices() {
+    if(API_KEY === "BURAYA_API_ANAHTARINI_YAPISTIR" || API_KEY.trim() === "") {
+        console.warn("API Anahtarı girilmediği için gerçek verilere bağlanılamıyor. Simülasyon devam ediyor.");
+        return;
+    }
+
+    try {
+        const symbols = Object.values(symbolMap).join(',');
+        const response = await fetch(`https://financialmodelingprep.com/api/v3/quote/${symbols}?apikey=${API_KEY}`);
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+            globalMarketData.forEach(item => {
+                const fmpSymbol = symbolMap[item.name];
+                const liveData = data.find(d => d.symbol === fmpSymbol);
+                
+                if (liveData) {
+                    const oldPrice = item.price;
+                    item.price = liveData.price; // Gerçek Spot Fiyat
+                    item.changePercent = liveData.changesPercentage.toFixed(2); // Gerçek Günlük Değişim Yüzdesi
+
+                    // Anlık veriyi grafiğe ekle
+                    const now = new Date().getTime();
+                    if (item.intraday && item.intraday.length > 0) {
+                        item.intraday.push({ x: now, y: item.price });
+                        if(item.intraday.length > 500) item.intraday.shift();
+                    }
+
+                    updateLiveUI(item.name, oldPrice, item.price, item.changePercent);
+                }
+            });
+
+            // Aktif grafiği sessizce güncelle
+            const activeBtn = document.querySelector('.time-btn.active');
+            if (activeBtn && parseInt(activeBtn.getAttribute('data-days')) === 1) {
+                applyTimeFilter(1, true);
+            }
+        }
+    } catch (error) {
+        console.error("Gerçek piyasa verisi çekilirken hata oluştu:", error);
+    }
+}
+
+// 3 saniyede bir çalışan illüzyon motoru (Gerçek fiyata çapalanmıştır, kotayı yakmaz)
 function startLiveTicker() {
     setInterval(() => {
         const now = new Date().getTime();
         
         globalMarketData.forEach(item => {
-            // Gerçekçi mikro dalgalanma (%0.02 ile % -0.02 arası)
             const changeFactor = 1 + ((Math.random() - 0.5) * 0.0004);
             const oldPrice = item.price;
             const newPrice = parseFloat((oldPrice * changeFactor).toFixed(2));
             
-            item.price = newPrice;
+            item.price = newPrice; // Çapalanmış mikro dalgalanma
             
-            // Eğer 1 günlük grafikteysek yeni veriyi grafiğe canlı ekle
             if (item.intraday && item.intraday.length > 0) {
                 item.intraday.push({ x: now, y: newPrice });
-                
-                // Çok fazla veri birikmesini engelle (Sadece son 24 saati tut)
                 if(item.intraday.length > 500) item.intraday.shift();
             }
 
-            updateLiveUI(item.name, oldPrice, newPrice);
+            updateLiveUI(item.name, oldPrice, newPrice, item.changePercent);
         });
 
-        // Ortadaki büyük grafiği canlı olarak güncelle
         const activeBtn = document.querySelector('.time-btn.active');
         if (activeBtn && parseInt(activeBtn.getAttribute('data-days')) === 1) {
             applyTimeFilter(1, true); 
         }
-
-    }, 3000); // Her 3 saniyede bir yeni fiyat (Canlı Akış)
+    }, 3000); 
 }
 
-// === YENİ: CANLI UI GÜNCELLEYİCİ (FLAŞ EFEKTİ) ===
-function updateLiveUI(symbolName, oldPrice, newPrice) {
+function updateLiveUI(symbolName, oldPrice, newPrice, realChangePercent) {
     const card = document.querySelector(`.card[data-name="${symbolName}"]`);
     if (!card) return;
 
     const priceEl = card.querySelector('.price');
+    const badgeEl = card.querySelector('.badge');
+    
     if (priceEl) {
         priceEl.textContent = `$${newPrice.toFixed(2)}`;
-        
-        // Fiyat arttıysa yeşil, düştüyse kırmızı anlık parlama (Flash efekti)
         const color = newPrice >= oldPrice ? '#10b981' : '#ef4444';
         priceEl.style.color = color;
-        setTimeout(() => { priceEl.style.color = '#0f172a'; }, 500); // Yarım saniye sonra normale dön
+        setTimeout(() => { priceEl.style.color = '#000000'; }, 500); 
+    }
+    
+    // Yüzdelik değişimi gerçek API'den gelen değere sabitler
+    if (badgeEl && realChangePercent !== undefined) {
+        const isPos = parseFloat(realChangePercent) >= 0;
+        const sign = isPos ? '+' : '';
+        badgeEl.className = `badge ${isPos ? 'positive' : 'negative'}`;
+        badgeEl.textContent = `${sign}${realChangePercent}%`;
     }
     
     if (symbolName === currentSymbolName) {
@@ -152,7 +214,6 @@ function renderGoldPriceTable(item) {
             const cutoffDate = lastData.x - (p.days * 24 * 60 * 60 * 1000);
             
             const filteredData = sourceData.filter(h => h.x >= cutoffDate);
-            
             let startPrice = sourceData[0].y;
             if (filteredData.length > 0) { startPrice = filteredData[0].y; }
             
@@ -160,6 +221,12 @@ function renderGoldPriceTable(item) {
             changePercent = (changeAmount / startPrice) * 100;
         } else if (p.days === 1) {
             changePercent = parseFloat(item.changePercent) || 0;
+            changeAmount = item.price - (item.price / (1 + (changePercent/100)));
+        }
+
+        // Today satırı direkt gerçek API yüzdesine eşitleniyor (Sıfır Hata)
+        if (p.days === 1) {
+            changePercent = parseFloat(item.changePercent);
             changeAmount = item.price - (item.price / (1 + (changePercent/100)));
         }
 
@@ -196,17 +263,23 @@ function updateCardPercentages(days) {
     globalMarketData.forEach(item => {
         const cardBadge = document.querySelector(`.card[data-name="${item.name}"] .badge`);
         if (!cardBadge) return;
-        let changePercent = 0;
-        let targetHistory = (days === 1 && item.intraday && item.intraday.length > 0) ? item.intraday : item.history;
-        if (targetHistory && targetHistory.length > 0) {
-            const lastData = targetHistory[targetHistory.length - 1];
-            const filteredData = targetHistory.filter(h => h.x >= (lastData.x - (days * 24 * 60 * 60 * 1000)));
-            if (filteredData.length > 0) changePercent = ((lastData.y - filteredData[0].y) / filteredData[0].y) * 100;
-            else changePercent = parseFloat(item.changePercent); 
-        } else { changePercent = parseFloat(item.changePercent); }
-        const isPos = changePercent >= 0;
-        cardBadge.className = `badge ${isPos ? 'positive' : 'negative'}`;
-        cardBadge.textContent = `${isPos ? '+' : ''}${changePercent.toFixed(2)}%`;
+        
+        if (days > 1) {
+            let changePercent = 0;
+            if (item.history && item.history.length > 0) {
+                const lastData = item.history[item.history.length - 1];
+                const filteredData = item.history.filter(h => h.x >= (lastData.x - (days * 24 * 60 * 60 * 1000)));
+                if (filteredData.length > 0) changePercent = ((lastData.y - filteredData[0].y) / filteredData[0].y) * 100;
+            }
+            const isPos = changePercent >= 0;
+            cardBadge.className = `badge ${isPos ? 'positive' : 'negative'}`;
+            cardBadge.textContent = `${isPos ? '+' : ''}${changePercent.toFixed(2)}%`;
+        } else {
+            const isPos = parseFloat(item.changePercent) >= 0;
+            const sign = isPos ? '+' : '';
+            cardBadge.className = `badge ${isPos ? 'positive' : 'negative'}`;
+            cardBadge.textContent = `${sign}${item.changePercent}%`;
+        }
     });
 }
 
@@ -229,7 +302,6 @@ function applyTimeFilter(days, isLiveUpdate = false) {
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
 
-    // Animasyonu canlı akışta kapatıyoruz ki grafik titremesin
     if (isLiveUpdate) {
         mainApexChart.updateSeries([{ name: 'Price', data: filteredData }], false);
     } else {
@@ -337,86 +409,4 @@ function loadCustomApexChart(item) {
         },
         xaxis: {
             type: 'datetime',
-            tickAmount: days >= 365 ? 5 : 6,
-            labels: { 
-                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 600 }, 
-                datetimeUTC: false,
-                formatter: function(val) {
-                    if (!val) return '';
-                    const date = new Date(val);
-                    if (days === 1) return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-                    if (days >= 365) return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                }
-            },
-            axisBorder: { show: true, color: '#000000' }, 
-            axisTicks: { show: true, color: '#000000' },
-            crosshairs: { show: true, position: 'back', stroke: { color: '#64748b', width: 1, dashArray: 4 } }
-        },
-        yaxis: {
-            opposite: false, 
-            min: minPrice - (minPrice * 0.002),
-            max: maxPrice + (maxPrice * 0.002),
-            labels: {
-                style: { colors: '#334155', fontSize: '13px', fontFamily: 'Inter', fontWeight: 600 }, 
-                formatter: (value) => `$${value.toFixed(2)}`
-            }
-        },
-        grid: {
-            show: true, 
-            borderColor: '#000000', 
-            strokeDashArray: 4, 
-            position: 'back',
-            xaxis: { lines: { show: true } }, 
-            yaxis: { lines: { show: true } }, 
-            padding: { top: 10, right: 20, bottom: 20, left: 10 }
-        }
-    };
-
-    mainApexChart = new ApexCharts(container, options);
-    mainApexChart.render();
-}
-
-async function fetchMarketData(isFirstLoad = false) {
-    const container = document.getElementById('market-data');
-    try {
-        const response = await fetch('data.json?v=' + new Date().getTime());
-        const data = await response.json();
-        
-        if (!data || data.length === 0) return;
-        globalMarketData = data; 
-        container.innerHTML = ''; 
-
-        data.forEach((item, index) => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.setAttribute('data-name', item.name); 
-            
-            if (isFirstLoad && index === 0) setTimeout(() => loadCustomApexChart(item), 100);
-
-            const isPos = parseFloat(item.changePercent) >= 0;
-            const sign = isPos ? '+' : '';
-
-            card.innerHTML = `
-                <div class="card-info">
-                    <div class="icon-box">${getEmojiIcon(item.name)}</div>
-                    <div class="commodity-details">
-                        <h2>${item.name}</h2>
-                        <div class="price">$${item.price.toFixed(2)}</div>
-                    </div>
-                </div>
-                <div class="card-status">
-                    <div class="badge ${isPos ? 'positive' : 'negative'}">${sign}${item.changePercent}%</div>
-                </div>
-            `;
-            
-            card.addEventListener('click', () => loadCustomApexChart(item));
-            container.appendChild(card);
-        });
-
-        const activeBtn = document.querySelector('.time-btn.active');
-        const days = activeBtn ? parseInt(activeBtn.getAttribute('data-days')) : 1; 
-        updateCardPercentages(days);
-
-    } catch (error) { console.error("Veri çekme hatası:", error); }
-}
+            tickAmount: days >= 365 ? 5 :
