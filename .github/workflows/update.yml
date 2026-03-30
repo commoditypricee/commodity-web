@@ -1,37 +1,31 @@
-name: Piyasa Verilerini Guncelle
+name: Auto Update Market Data
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Her 5 dakikada bir otomatik çalışır
-  workflow_dispatch:
+    - cron: '*/15 * * * *' # Her 15 dakikada bir otomatik çalışır
+  workflow_dispatch: # İstersen GitHub üzerinden manuel de tetikleyebilirsin
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
     steps:
-      - name: Kodları Çek
-        uses: actions/checkout@v4
+      - name: Repoyu Klonla
+        uses: actions/checkout@v3
 
       - name: Node.js Kurulumu
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: '22'
+          node-version: '18'
 
-      - name: Paketleri Yükle
-        run: npm install yahoo-finance2
+      - name: Veri Çekme Robotunu Çalıştır
+        env:
+          FMP_API_KEY: ${{ secrets.FMP_API_KEY }}
+        run: node update-data.js
 
-      - name: Veri Çekiciyi Çalıştır
-        run: node update.js
-
-      - name: Değişiklikleri Kaydet
+      - name: Yeni Fiyatları data.json'a Kaydet ve Sürümle
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "🔄 Piyasa verileri güncellendi [skip ci]" || echo "Değişiklik yok"
+          git config --global user.name 'MarketBot'
+          git config --global user.email 'bot@commodity.com'
+          git add data.json
+          git commit -m "Otomatik Piyasa Güncellemesi" || exit 0
           git push
